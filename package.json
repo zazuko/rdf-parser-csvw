@@ -1,17 +1,18 @@
 {
-  "name": "rdf-parser-csvw",
+  "name": "@zazuko/rdf-parser-csvw",
   "version": "0.15.3",
   "description": "CSV on the Web parser",
   "main": "index.js",
   "scripts": {
-    "test": "standard && mocha"
+    "test": "standard && mocha",
+    "release": "changeset publish"
   },
   "bin": {
     "csvw-metadata": "./bin/csvw-metadata.js"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/rdf-ext/rdf-parser-csvw.git"
+    "url": "git://github.com/zazuko/rdf-parser-csvw.git"
   },
   "keywords": [
     "rdf",
@@ -19,12 +20,15 @@
     "csv",
     "csvw"
   ],
-  "author": "Thomas Bergwinkl <bergi@axolotlfarm.org> (https://www.bergnet.org/people/bergi/card#me)",
+  "author": "Zazuko GmbH",
+  "contributors": [
+    "Thomas Bergwinkl <bergi@axolotlfarm.org> (https://www.bergnet.org/people/bergi/card#me)"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rdf-ext/rdf-parser-csvw/issues"
+    "url": "https://github.com/zazuko/rdf-parser-csvw/issues"
   },
-  "homepage": "https://github.com/rdf-ext/rdf-parser-csvw",
+  "homepage": "https://github.com/zazuko/rdf-parser-csvw",
   "dependencies": {
     "@rdfjs/data-model": "^1.1.2",
     "commander": "^3.0.1",
@@ -35,6 +39,7 @@
     "uri-templates": "^0.2.0"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.5",
     "@rdfjs/dataset": "^1.1.1",
     "@rdfjs/parser-jsonld": "^1.1.2",
     "@rdfjs/parser-n3": "^1.1.3",
