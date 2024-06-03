@@ -2,8 +2,8 @@
 
 const assert = require('assert')
 const getStream = require('get-stream')
-const CsvParser = require('../lib/CsvParser')
 const { PassThrough } = require('readable-stream')
+const CsvParser = require('../lib/CsvParser')
 const waitFor = require('./support/waitFor')
 
 describe('csvParser', () => {
@@ -44,8 +44,8 @@ describe('csvParser', () => {
       line: 2,
       row: {
         key0: 'value0',
-        key1: 'value1'
-      }
+        key1: 'value1',
+      },
     }]
 
     parser.on('data', (data) => {
@@ -72,8 +72,8 @@ describe('csvParser', () => {
       line: 2,
       row: {
         key0: 'value0',
-        key1: 'value1'
-      }
+        key1: 'value1',
+      },
     }]
 
     parser.on('data', (data) => {
@@ -100,8 +100,8 @@ describe('csvParser', () => {
       line: 2,
       row: {
         key0: 'value0',
-        key1: 'value1'
-      }
+        key1: 'value1',
+      },
     }]
 
     parser.on('data', (data) => {
@@ -128,8 +128,8 @@ describe('csvParser', () => {
       line: 2,
       row: {
         key0: 'value0',
-        key1: 'value1'
-      }
+        key1: 'value1',
+      },
     }]
 
     parser.on('data', (data) => {

@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-const MetadataBuilder = require('../lib/MetadataBuilder')
-
 const program = require('commander')
+const MetadataBuilder = require('../lib/MetadataBuilder')
 
 program
   .arguments('<filename>')
@@ -13,7 +12,7 @@ program
   .action((filename, { baseIri, delimiter, aboutUrl, propertyBaseIri } = {}) => {
     MetadataBuilder.fromFile(filename, { baseIri, delimiter, aboutUrl, propertyBaseIri }).then(metadata => {
       process.stdout.write(JSON.stringify(metadata, null, ' '))
-    }).catch(err => console.error(err))
+    }).catch(err => process.stderr.write(err))
   })
 
 program.parse(process.argv)
