@@ -2,14 +2,14 @@
 
 const assert = require('assert')
 const fs = require('fs')
+const path = require('path')
 const fromStream = require('rdf-dataset-ext/fromStream')
 const toCanonical = require('rdf-dataset-ext/toCanonical')
 const glob = require('glob')
-const path = require('path')
-const rdf = require('./support/factory')
-const CsvwParser = require('..')
 const JsonLdParser = require('@rdfjs/parser-jsonld')
 const N3Parser = require('@rdfjs/parser-n3')
+const CsvwParser = require('..')
+const rdf = require('./support/factory')
 
 const blackList = [
   '006',
@@ -18,10 +18,10 @@ const blackList = [
   '011',
   '012',
   '016',
-  '017'
+  '017',
 ]
 
-function datasetFromN3Fs (filename) {
+function datasetFromN3Fs(filename) {
   filename = path.resolve(filename)
 
   try {
@@ -35,7 +35,7 @@ function datasetFromN3Fs (filename) {
   return fromStream(rdf.dataset(), parser.import(fs.createReadStream(filename)))
 }
 
-function datasetFromJsonLdFs (filename) {
+function datasetFromJsonLdFs(filename) {
   const parser = new JsonLdParser({ factory: rdf })
 
   return fromStream(rdf.dataset(), parser.import(fs.createReadStream(path.resolve(filename))))
@@ -56,13 +56,13 @@ describe('test-cases', () => {
     it(baseName, () => {
       return Promise.all([
         datasetFromJsonLdFs(metadataFile),
-        datasetFromN3Fs(outputFile)
+        datasetFromN3Fs(outputFile),
       ]).then(([metadata, output]) => {
         const parser = new CsvwParser({
           factory: rdf,
           baseIRI: path.basename(csvFile),
-          metadata: metadata,
-          timezone: 'UTC'
+          metadata,
+          timezone: 'UTC',
         })
         const input = fs.createReadStream(csvFile)
         const stream = parser.import(input)

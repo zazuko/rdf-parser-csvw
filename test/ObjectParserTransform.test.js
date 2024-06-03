@@ -3,9 +3,9 @@
 const assert = require('assert')
 const fromStream = require('rdf-dataset-ext/fromStream')
 const toCanonical = require('rdf-dataset-ext/toCanonical')
-const rdf = require('./support/factory')
-const ObjectParserTransform = require('../lib/ObjectParserTransform')
 const { PassThrough } = require('readable-stream')
+const ObjectParserTransform = require('../lib/ObjectParserTransform')
+const rdf = require('./support/factory')
 const waitFor = require('./support/waitFor')
 
 const ns = {
@@ -17,14 +17,14 @@ const ns = {
     row: rdf.namedNode('http://www.w3.org/ns/csvw#row'),
     rownum: rdf.namedNode('http://www.w3.org/ns/csvw#rownum'),
     table: rdf.namedNode('http://www.w3.org/ns/csvw#table'),
-    url: rdf.namedNode('http://www.w3.org/ns/csvw#url')
+    url: rdf.namedNode('http://www.w3.org/ns/csvw#url'),
   },
   rdf: {
-    type: rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type')
+    type: rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
   },
   xsd: {
-    integer: rdf.namedNode('http://www.w3.org/2001/XMLSchema#integer')
-  }
+    integer: rdf.namedNode('http://www.w3.org/2001/XMLSchema#integer'),
+  },
 }
 
 describe('ObjectParserTransform', () => {
@@ -51,8 +51,8 @@ describe('ObjectParserTransform', () => {
       line: 2,
       row: {
         key0: 'value0',
-        key1: 'value1'
-      }
+        key1: 'value1',
+      },
     })
 
     input.end()
@@ -92,8 +92,8 @@ describe('ObjectParserTransform', () => {
       line: 2,
       row: {
         key0: 'value0',
-        key1: 'value1'
-      }
+        key1: 'value1',
+      },
     })
 
     input.end()

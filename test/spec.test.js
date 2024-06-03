@@ -5,10 +5,10 @@ const fs = require('fs')
 const path = require('path')
 const fromStream = require('rdf-dataset-ext/fromStream')
 const toCanonical = require('rdf-dataset-ext/toCanonical')
-const rdf = require('./support/factory')
-const CsvwParser = require('..')
 const JsonLdParser = require('@rdfjs/parser-jsonld')
 const N3Parser = require('@rdfjs/parser-n3')
+const CsvwParser = require('..')
+const rdf = require('./support/factory')
 
 const blackList = [
   'manifest-rdf#test016',
@@ -56,22 +56,22 @@ const blackList = [
   'manifest-rdf#test285',
   'manifest-rdf#test305',
   'manifest-rdf#test306',
-  'manifest-rdf#test307'
+  'manifest-rdf#test307',
 ]
 
-function datasetFromN3Fs (filename) {
+function datasetFromN3Fs(filename) {
   const parser = new N3Parser({ baseIRI: new String('') }) // eslint-disable-line no-new-wrappers
 
   return fromStream(rdf.dataset(), parser.import(fs.createReadStream(filename), { factory: rdf }))
 }
 
-function datasetFromJsonLdFs (filename) {
+function datasetFromJsonLdFs(filename) {
   const parser = new JsonLdParser()
 
   return fromStream(rdf.dataset(), parser.import(fs.createReadStream(filename), { factory: rdf }))
 }
 
-function loadTests () {
+function loadTests() {
   const manifestFile = 'test/spec/manifest-rdf.ttl'
 
   try {
@@ -84,7 +84,7 @@ function loadTests () {
     let tests = [...manifest.match(
       null,
       rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-      rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#ToRdfTest')
+      rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#ToRdfTest'),
     )].map((test) => {
       return test.subject
     }).map((test) => {
@@ -115,11 +115,11 @@ function loadTests () {
 
       return {
         iri: test.value,
-        label: label,
-        name: name,
-        input: input,
-        metadata: metadata,
-        result: result
+        label,
+        name,
+        input,
+        metadata,
+        result,
       }
     })
 
@@ -153,12 +153,12 @@ loadTests().then((tests) => {
         const input = fs.createReadStream('test/spec/' + test.input)
         const stream = parser.import(input, {
           baseIRI: path.basename(test.input),
-          metadata: test.metadata
+          metadata: test.metadata,
         })
 
         return Promise.all([
           datasetFromN3Fs('test/spec/' + test.result),
-          fromStream(rdf.dataset(), stream)
+          fromStream(rdf.dataset(), stream),
         ]).then((results) => {
           const expected = results[0]
           const actual = results[1]

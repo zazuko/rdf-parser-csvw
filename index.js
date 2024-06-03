@@ -1,10 +1,10 @@
+const rdf = require('@rdfjs/data-model')
 const CsvParser = require('./lib/CsvParser')
 const parseMetadata = require('./lib/metadata')
-const rdf = require('@rdfjs/data-model')
 const ObjectParserTransform = require('./lib/ObjectParserTransform')
 
 class Parser {
-  constructor ({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError } = {}) {
+  constructor({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError } = {}) {
     this.metadata = metadata
     this.baseIRI = baseIRI
     this.factory = factory
@@ -13,13 +13,13 @@ class Parser {
     this.skipLinesWithError = skipLinesWithError
   }
 
-  import (input, {
+  import(input, {
     metadata = this.metadata,
     baseIRI = this.baseIRI,
     factory = this.factory,
     timezone = this.timezone,
     relaxColumnCount = this.relaxColumnCount,
-    skipLinesWithError = this.skipLinesWithError
+    skipLinesWithError = this.skipLinesWithError,
   } = {}) {
     const parsedMetadata = parseMetadata(metadata, { baseIRI, factory, timezone })
 
@@ -28,7 +28,7 @@ class Parser {
       lineTerminators: parsedMetadata.lineTerminators,
       quoteChar: parsedMetadata.quoteChar,
       relaxColumnCount,
-      skipLinesWithError
+      skipLinesWithError,
     })
 
     const output = new ObjectParserTransform({ baseIRI, factory, metadata: parsedMetadata, timezone })
@@ -52,7 +52,7 @@ class Parser {
     return output
   }
 
-  static import (input, options) {
+  static import(input, options) {
     return (new Parser(options)).import(input)
   }
 }
