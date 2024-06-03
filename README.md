@@ -2,6 +2,8 @@
 
 A CSV on the Web parser with [RDFJS Stream interface](https://github.com/rdfjs/representation-task-force/).
 
+⛓️‍💥 Fork of rdf-ext/rdf-parser-csvw converted to ESM, including some tweaks and fixes
+    
 ## Usage
 
 The package exports the parser as a class, so an instance must be created before it can be used.
