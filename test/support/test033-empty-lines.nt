@@ -1,4 +1,4 @@
-_:g32608600 <http://www.w3.org/ns/csvw#url> <test033-empty-lines.csv#row=4> .
+_:g32608600 <http://www.w3.org/ns/csvw#url> <test033-empty-lines.csv#row=5> .
 _:g32608600 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/csvw#Row> .
 _:g32608600 <http://www.w3.org/ns/csvw#describes> <http://example.org/id/234345> .
 _:g32608600 <http://www.w3.org/ns/csvw#rownum> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
