@@ -1,12 +1,10 @@
-/* global describe, it */
-
-const assert = require('assert')
-const fromStream = require('rdf-dataset-ext/fromStream')
-const toCanonical = require('rdf-dataset-ext/toCanonical')
-const { PassThrough } = require('readable-stream')
-const ObjectParserTransform = require('../lib/ObjectParserTransform')
-const rdf = require('./support/factory')
-const waitFor = require('./support/waitFor')
+import assert from 'assert'
+import fromStream from 'rdf-dataset-ext/fromStream.js'
+import toCanonical from 'rdf-dataset-ext/toCanonical.js'
+import { PassThrough } from 'readable-stream'
+import ObjectParserTransform from '../lib/ObjectParserTransform.js'
+import rdf from './support/factory.js'
+import waitFor from './support/waitFor.js'
 
 const ns = {
   csvw: {

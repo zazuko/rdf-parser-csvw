@@ -1,10 +1,8 @@
-/* global describe, it */
-
-const assert = require('assert')
-const getStream = require('get-stream')
-const { PassThrough } = require('readable-stream')
-const CsvParser = require('../lib/CsvParser')
-const waitFor = require('./support/waitFor')
+import assert from 'assert'
+import { getStreamAsArray } from 'get-stream'
+import { PassThrough } from 'readable-stream'
+import CsvParser from '../lib/CsvParser.js'
+import waitFor from './support/waitFor.js'
 
 describe('csvParser', () => {
   it('should be a function', () => {
@@ -157,7 +155,7 @@ describe('csvParser', () => {
     input.end()
 
     await assert.rejects(async () => {
-      await getStream.array(parser)
+      await getStreamAsArray(parser)
     })
   })
 })

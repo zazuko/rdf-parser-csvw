@@ -3,11 +3,21 @@
   "version": "0.15.3",
   "description": "CSV on the Web parser",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --quiet",
     "test": "mocha",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "prepack": "tsc"
   },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "bin/csvw-metadata.js",
+    "bin/csvw-metadata.d.ts",
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
   "bin": {
     "csvw-metadata": "./bin/csvw-metadata.js"
   },
@@ -31,23 +41,39 @@
   },
   "homepage": "https://github.com/zazuko/rdf-parser-csvw",
   "dependencies": {
-    "@rdfjs/data-model": "^1.1.2",
-    "commander": "^3.0.1",
-    "csv-parse": "^5.3.1",
+    "@rdfjs/data-model": "^2.0.2",
+    "@rdfjs/dataset": "^2.0.2",
+    "commander": "^12.1.0",
+    "csv-parse": "^5.5.6",
     "lodash": "^4.17.15",
     "luxon": "^1.17.3",
-    "readable-stream": "^3.4.0",
+    "readable-stream": "^4.5.2",
     "uri-templates": "^0.2.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.5",
-    "@rdfjs/dataset": "^1.1.1",
-    "@rdfjs/parser-jsonld": "^1.1.2",
-    "@rdfjs/parser-n3": "^1.1.3",
+    "@rdfjs/environment": "^1.0.0",
+    "@rdfjs/parser-jsonld": "^2.1.1",
+    "@rdfjs/parser-n3": "^2.0.2",
+    "@rdfjs/types": "^1.1.0",
     "@tpluscode/eslint-config": "^0.4.5",
-    "get-stream": "^6.0.0",
-    "glob": "^7.1.4",
-    "mocha": "^6.2.0",
-    "rdf-dataset-ext": "^1.0.0"
+    "@types/lodash": "^4.17.4",
+    "@types/luxon": "^3.4.2",
+    "@types/uri-templates": "^0.1.34",
+    "@types/rdfjs__data-model": "^2.0.8",
+    "@types/rdfjs__dataset": "^2.0.7",
+    "@types/rdfjs__environment": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "get-stream": "^9.0.1",
+    "glob": "^10.4.1",
+    "mocha": "^10.4.0",
+    "rdf-dataset-ext": "^1.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "mocha": {
+    "loader": "ts-node/esm"
   }
 }

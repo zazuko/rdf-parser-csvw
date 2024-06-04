@@ -1,14 +1,12 @@
-/* global describe, it */
-
-const assert = require('assert')
-const fs = require('fs')
-const path = require('path')
-const fromStream = require('rdf-dataset-ext/fromStream')
-const toCanonical = require('rdf-dataset-ext/toCanonical')
-const JsonLdParser = require('@rdfjs/parser-jsonld')
-const N3Parser = require('@rdfjs/parser-n3')
-const CsvwParser = require('..')
-const rdf = require('./support/factory')
+import assert from 'assert'
+import fs from 'fs'
+import path from 'path'
+import fromStream from 'rdf-dataset-ext/fromStream.js'
+import toCanonical from 'rdf-dataset-ext/toCanonical.js'
+import JsonLdParser from '@rdfjs/parser-jsonld'
+import N3Parser from '@rdfjs/parser-n3'
+import CsvwParser from '../index.js'
+import rdf from './support/factory.js'
 
 const blackList = [
   'manifest-rdf#test016',

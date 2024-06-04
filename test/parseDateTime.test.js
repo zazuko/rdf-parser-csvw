@@ -1,7 +1,5 @@
-/* global describe, it */
-
-const assert = require('assert')
-const parseDateTime = require('../lib/parseDateTime')
+import assert from 'assert'
+import parseDateTime from '../lib/parseDateTime.js'
 
 describe('parseDateTime', () => {
   it('should be a function', () => {

@@ -1,8 +1,25 @@
-const namespace = require('../namespace')
-const TableSchema = require('./TableSchema')
+import type { DataFactory, DatasetCore } from '@rdfjs/types'
+import namespace, { NS } from '../namespace.js'
+import TableSchema from './TableSchema.js'
 
-class Metadata {
-  constructor(dataset, { baseIRI, factory, timezone } = {}) {
+interface Options {
+  baseIRI: string
+  factory: DataFactory
+  timezone?: string
+}
+
+export default class Metadata {
+  factory: DataFactory
+  dataset: DatasetCore
+  baseIRI: string
+  timezone?: string
+  delimiter: string
+  quoteChar: string | null
+  lineTerminators: string[] | null
+  ns: NS
+  tableSchemas: TableSchema[] = []
+
+  constructor(dataset: DatasetCore, { baseIRI, factory, timezone }: Options) {
     this.factory = factory
     this.dataset = dataset
     this.baseIRI = baseIRI
@@ -52,7 +69,7 @@ class Metadata {
     const quoteCharQuad = [...this.dataset.match(dialectQuad.object, this.ns.quoteChar)][0]
 
     if (quoteCharQuad) {
-      if (quoteCharQuad.object.datatype.equals(this.ns.boolean) && quoteCharQuad.object.value === 'false') {
+      if (quoteCharQuad.object.termType === 'Literal' && quoteCharQuad.object.datatype.equals(this.ns.boolean) && quoteCharQuad.object.value === 'false') {
         this.quoteChar = null
       } else {
         this.quoteChar = quoteCharQuad.object.value
@@ -60,5 +77,3 @@ class Metadata {
     }
   }
 }
-
-module.exports = Metadata
