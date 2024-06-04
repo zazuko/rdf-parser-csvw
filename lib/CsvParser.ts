@@ -7,12 +7,13 @@ interface Options {
   quoteChar?: string | null
   relaxColumnCount?: boolean
   skipLinesWithError?: boolean
+  skipEmptyLines?: boolean
 }
 
 export default class CsvParser extends Transform {
   parser: Parser
 
-  constructor({ delimiter, lineTerminators, quoteChar, relaxColumnCount, skipLinesWithError }: Options = {}) {
+  constructor({ delimiter, lineTerminators, quoteChar, relaxColumnCount, skipLinesWithError, skipEmptyLines = true }: Options = {}) {
     super({
       readableObjectMode: true,
     })
@@ -26,6 +27,7 @@ export default class CsvParser extends Transform {
       record_delimiter: lineTerminators || [],
       relax_column_count: relaxColumnCount,
       skipRecordsWithError: skipLinesWithError,
+      skip_empty_lines: skipEmptyLines,
     })
 
     this.parser.on('error', err => {
