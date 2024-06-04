@@ -1,6 +1,6 @@
-import { DateTime, Zone } from 'luxon'
+import { DateTime } from 'luxon'
 
-export default function parseDateTime(value: string, format: string | undefined, timezone: string | Zone | undefined) {
+export default function parseDateTime(value: string, format: string | undefined, timezone: string | undefined) {
   if (format) {
     return DateTime.fromFormat(value, format, { zone: timezone })
   }
