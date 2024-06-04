@@ -1,6 +1,6 @@
-const { DateTime } = require('luxon')
+import { DateTime } from 'luxon'
 
-function parseDateTime(value, format, timezone) {
+export default function parseDateTime(value: string, format: string | undefined, timezone: string | undefined) {
   if (format) {
     return DateTime.fromFormat(value, format, { zone: timezone })
   }
@@ -8,5 +8,3 @@ function parseDateTime(value, format, timezone) {
   return DateTime.fromISO(value, { zone: timezone }) ||
     DateTime.fromRFC2822(value, { zone: timezone })
 }
-
-module.exports = parseDateTime

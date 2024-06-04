@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const program = require('commander')
-const MetadataBuilder = require('../lib/MetadataBuilder')
+import { program } from 'commander'
+import MetadataBuilder from '../lib/MetadataBuilder.js'
 
 program
   .arguments('<filename>')

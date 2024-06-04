@@ -1,10 +1,29 @@
-const rdf = require('@rdfjs/data-model')
-const CsvParser = require('./lib/CsvParser')
-const parseMetadata = require('./lib/metadata')
-const ObjectParserTransform = require('./lib/ObjectParserTransform')
+import type { Readable } from 'stream'
+import rdf from '@rdfjs/data-model'
+import type { DataFactory, DatasetCore } from '@rdfjs/types'
+import CsvParser from './lib/CsvParser.js'
+import parseMetadata from './lib/metadata/index.js'
+import ObjectParserTransform from './lib/ObjectParserTransform.js'
+import Metadata from './lib/metadata/Metadata.js'
 
-class Parser {
-  constructor({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError } = {}) {
+export interface Options {
+  baseIRI?: string
+  metadata: Metadata | DatasetCore
+  factory?: DataFactory
+  timezone?: string
+  relaxColumnCount?: boolean
+  skipLinesWithError?: boolean
+}
+
+export default class Parser {
+  private readonly metadata: Metadata | DatasetCore
+  private readonly baseIRI: string
+  private readonly factory: DataFactory
+  private readonly timezone: string | undefined
+  private readonly relaxColumnCount: boolean | undefined
+  private readonly skipLinesWithError: boolean | undefined
+
+  constructor({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError }: Options) {
     this.metadata = metadata
     this.baseIRI = baseIRI
     this.factory = factory
@@ -13,14 +32,14 @@ class Parser {
     this.skipLinesWithError = skipLinesWithError
   }
 
-  import(input, {
+  import(input: Readable, {
     metadata = this.metadata,
     baseIRI = this.baseIRI,
     factory = this.factory,
     timezone = this.timezone,
     relaxColumnCount = this.relaxColumnCount,
     skipLinesWithError = this.skipLinesWithError,
-  } = {}) {
+  }: Partial<Options> = {}) {
     const parsedMetadata = parseMetadata(metadata, { baseIRI, factory, timezone })
 
     const reader = new CsvParser({
@@ -43,7 +62,7 @@ class Parser {
       output.destroy(err)
     })
 
-    input.on('error', (err) => {
+    input.on('error', (err: Error) => {
       output.destroy(err)
     })
 
@@ -52,9 +71,7 @@ class Parser {
     return output
   }
 
-  static import(input, options) {
+  static import(input: Readable, options: Options) {
     return (new Parser(options)).import(input)
   }
 }
-
-module.exports = Parser

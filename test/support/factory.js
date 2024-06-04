@@ -1,6 +1,5 @@
-const DataModelFactory = require('@rdfjs/data-model')
-const DatasetFactory = require('@rdfjs/dataset')
+import Environment from '@rdfjs/environment'
+import DataModelFactory from '@rdfjs/data-model/Factory.js'
+import DatasetFactory from '@rdfjs/dataset/Factory.js'
 
-const factory = { ...DataModelFactory, ...DatasetFactory }
-
-module.exports = factory
+export default new Environment([DataModelFactory, DatasetFactory])

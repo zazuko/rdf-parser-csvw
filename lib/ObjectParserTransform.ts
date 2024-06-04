@@ -1,10 +1,32 @@
-const rdf = require('@rdfjs/data-model')
-const { Transform } = require('readable-stream')
-const parseMetadata = require('./metadata')
-const namespace = require('./namespace')
+import rdf from '@rdfjs/data-model'
+import { Transform } from 'readable-stream'
+import type { BlankNode, DataFactory, NamedNode, Quad } from '@rdfjs/types'
+import parseMetadata from './metadata/index.js'
+import namespace, { NS } from './namespace.js'
+import TableSchema from './metadata/TableSchema.js'
+import Metadata from './metadata/Metadata.js'
 
-class ObjectParserTransform extends Transform {
-  constructor({ baseIRI = '', factory = rdf, metadata, tableSchema, timezone } = {}) {
+interface Options {
+  baseIRI?: string
+  factory?: DataFactory
+  metadata?: Metadata
+  tableSchema?: TableSchema
+  timezone?: string
+}
+
+export default class ObjectParserTransform extends Transform {
+  private readonly baseIRI: string
+  private readonly factory: DataFactory
+  private readonly timezone: string | undefined
+  private ns: NS
+  private contentLine: number
+  private tableGroupNode: NamedNode | BlankNode
+  private tableNode: NamedNode | BlankNode
+  private tableSchema: TableSchema
+  private parsedMetadata: Metadata
+  private columns: [] | null
+
+  constructor({ baseIRI = '', factory = rdf, metadata, tableSchema, timezone }: Options = {}) {
     super({
       objectMode: true,
     })
@@ -13,7 +35,11 @@ class ObjectParserTransform extends Transform {
     this.factory = factory
     this.timezone = timezone
     this.ns = namespace(this.factory)
-    this.parsedMetadata = parseMetadata(metadata, { baseIRI: this.baseIRI, factory: this.factory, timezone: this.timezone })
+    this.parsedMetadata = parseMetadata(metadata, {
+      baseIRI: this.baseIRI,
+      factory: this.factory,
+      timezone: this.timezone,
+    })
     this.tableSchema = tableSchema || this.parsedMetadata.tableSchemas[0]
 
     this.contentLine = 0
@@ -25,7 +51,7 @@ class ObjectParserTransform extends Transform {
     this.processTable()
   }
 
-  _transform(obj, encoding, done) {
+  _transform(obj: { line: number; row: Record<string, string> }, encoding: string, done: () => void) {
     this.processRow(obj.line, obj.row).then(done).catch(done)
   }
 
@@ -67,7 +93,7 @@ class ObjectParserTransform extends Transform {
     }
   }
 
-  processRow(line, row) {
+  processRow(line: number, row: Record<string, string>) {
     this.contentLine++
 
     const rowNode = this.factory.blankNode()
@@ -86,8 +112,8 @@ class ObjectParserTransform extends Transform {
 
     const rowData = {
       ...row,
-      _row: this.contentLine,
-      _sourceRow: line,
+      _row: `${this.contentLine}`,
+      _sourceRow: `${line}`,
     }
 
     // describes
@@ -129,7 +155,7 @@ class ObjectParserTransform extends Transform {
     return Promise.resolve()
   }
 
-  copySubgraph(quads, subject) {
+  copySubgraph(quads: Quad[], subject?: NamedNode | BlankNode) {
     quads.forEach((quad) => {
       this.push(this.factory.quad(
         subject || quad.subject,
@@ -143,5 +169,3 @@ class ObjectParserTransform extends Transform {
     })
   }
 }
-
-module.exports = ObjectParserTransform

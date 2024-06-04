@@ -1,14 +1,61 @@
-const URL = require('url')
-const difference = require('lodash/difference')
-const uriTemplate = require('uri-templates')
-const namespace = require('../namespace')
-const parseDateTime = require('../parseDateTime')
-const RdfUtils = require('./RdfUtils')
+/* eslint-disable camelcase */
+import URL from 'url'
+import difference from 'lodash/difference.js'
+import uriTemplate, { URITemplate } from 'uri-templates'
+import type { BlankNode, DataFactory, DatasetCore, NamedNode, Quad_Object, Term } from '@rdfjs/types'
+import namespace, { NS } from '../namespace.js'
+import parseDateTime from '../parseDateTime.js'
+import RdfUtils from './RdfUtils.js'
 
 const defaultColumnNames = new Set(['_column', '_sourceColumn', '_row', '_sourceRow', '_name'])
 
-class TableSchema {
-  constructor(dataset, { root, baseIRI, factory, timezone } = {}) {
+interface Options {
+  baseIRI: string
+  factory: DataFactory
+  timezone?: string
+  root?: Term
+}
+
+type Row = Record<string, string>
+
+interface Datatype {
+  base: NamedNode
+  format?: string
+}
+
+interface ParsedColumn {
+  aboutUrl?: URITemplate
+  datatype: Datatype
+  language?: URITemplate
+  name: string
+  nullValue?: string
+  defaultValue?: string
+  propertyUrl: URITemplate
+  suppressOutput?: boolean
+  titles: string[]
+  virtual?: string
+  valueUrl?: URITemplate
+}
+
+interface Column {
+  subject: NamedNode | BlankNode | null
+  property: NamedNode
+  value: Quad_Object
+}
+
+export default class TableSchema {
+  private readonly factory: DataFactory
+  private readonly ns: NS
+  private readonly dataset: DatasetCore
+  private readonly root: Term | undefined
+  private readonly baseIRI: string
+  private readonly timezone: string | undefined
+  private parsedColumns: ParsedColumn[]
+  private allColumns: ParsedColumn[] | null
+  aboutUrl: (row: Row) => NamedNode | BlankNode
+  propertyUrl?: URITemplate
+
+  constructor(dataset: DatasetCore, { root, baseIRI, factory, timezone }: Options) {
     this.factory = factory
     this.ns = namespace(this.factory)
     this.dataset = dataset
@@ -39,7 +86,7 @@ class TableSchema {
 
     const aboutUrlTemplate = uriTemplate(aboutUrl)
 
-    return (row) => {
+    return (row: Row) => {
       return this.factory.namedNode(URL.resolve(this.baseIRI, aboutUrlTemplate.fill(row))) // eslint-disable-line n/no-deprecated-api
     }
   }
@@ -69,10 +116,8 @@ class TableSchema {
       const virtual = RdfUtils.findValue(this.dataset, node, this.ns.virtual)
       const valueUrl = RdfUtils.findValue(this.dataset, node, this.ns.valueUrl)
 
-      return {
-        aboutUrl: aboutUrl && uriTemplate(aboutUrl),
+      const column: ParsedColumn = {
         datatype: this.parseDatatype(node),
-        language: language && uriTemplate(language),
         name,
         nullValue,
         defaultValue,
@@ -80,12 +125,23 @@ class TableSchema {
         suppressOutput: suppressOutput === 'true',
         titles,
         virtual,
-        valueUrl: valueUrl && uriTemplate(valueUrl),
       }
+
+      if (aboutUrl) {
+        column.aboutUrl = uriTemplate(aboutUrl)
+      }
+      if (valueUrl) {
+        column.valueUrl = uriTemplate(valueUrl)
+      }
+      if (language) {
+        column.language = uriTemplate(language)
+      }
+
+      return column
     })
   }
 
-  parseDatatype(node) {
+  parseDatatype(node: Term): Datatype {
     const datatype = RdfUtils.findNode(this.dataset, node, this.ns.datatype)
 
     if (!datatype) {
@@ -93,7 +149,7 @@ class TableSchema {
     }
 
     if (datatype.termType === 'NamedNode') {
-      return { base: datatype.value }
+      return { base: datatype }
     }
 
     const base = RdfUtils.findValue(this.dataset, datatype, this.ns.base)
@@ -105,24 +161,25 @@ class TableSchema {
     }
   }
 
-  columns({ contentLine, row }) {
+  columns({ contentLine, row }: { contentLine: number; row: Row }): Column[] {
     try {
       if (!this.allColumns) {
         this.createAllColumns(row)
       }
 
-      return this.allColumns.map((column) => {
+      return this.allColumns!.map((column) => {
         const cellData = { ...row, _name: column.name }
 
         return {
           subject: this.subject(column, cellData),
           property: this.property(column, cellData),
           value: this.value(column, cellData),
-        }
-      }).filter((column) => {
+        } as Column
+      }).filter((column: Column) => {
         return column.value !== undefined
       })
-    } catch (cause) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (cause: any) {
       const err = new Error(`could not parse content line ${contentLine}`)
 
       err.stack += `\nCaused by: ${cause.stack}`
@@ -131,7 +188,7 @@ class TableSchema {
     }
   }
 
-  subject(column, row) {
+  subject(column: ParsedColumn, row: Row) {
     if (!column.aboutUrl) {
       return null
     }
@@ -139,7 +196,7 @@ class TableSchema {
     return this.factory.namedNode(URL.resolve(this.baseIRI, column.aboutUrl.fill(row))) // eslint-disable-line n/no-deprecated-api
   }
 
-  value(column, row) {
+  value(column: ParsedColumn, row: Row) {
     if (column.suppressOutput) {
       return undefined
     }
@@ -152,7 +209,7 @@ class TableSchema {
       return value || row[title]
     }, '')
 
-    if (value === '') {
+    if (value === '' && column.defaultValue) {
       value = column.defaultValue
     }
 
@@ -160,8 +217,8 @@ class TableSchema {
       return undefined
     }
 
-    if (column.datatype.base.value === this.ns.dateTime.value) {
-      return this.factory.literal(parseDateTime(value, column.datatype.format, this.timezone).toISO(), this.ns.dateTime)
+    if (this.ns.dateTime.equals(column.datatype.base)) {
+      return this.factory.literal(parseDateTime(value, column.datatype.format, this.timezone).toISO()!, this.ns.dateTime)
     }
 
     if (column.datatype.base.value === this.ns.date.value) {
@@ -173,16 +230,16 @@ class TableSchema {
     }
   }
 
-  property(column, row) {
+  property(column: ParsedColumn, row: Row) {
     return this.factory.namedNode(column.propertyUrl.fill(row))
   }
 
-  createAllColumns(row) {
-    const titles = this.parsedColumns.reduce((titles, column) => {
+  createAllColumns(row: Row) {
+    const titles = this.parsedColumns.reduce<string[]>((titles, column) => {
       return titles.concat(column.titles)
     }, [])
 
-    const undefinedColumns = difference(Object.keys(row), titles).reduce((titles, title) => {
+    const undefinedColumns = difference(Object.keys(row), titles).reduce((titles: ParsedColumn[], title): ParsedColumn[] => {
       if (defaultColumnNames.has(title)) return titles
 
       return [...titles, {
@@ -191,22 +248,20 @@ class TableSchema {
         propertyUrl: this.propertyUrl || this.defaultPropertyUrl(title),
         datatype: this.defaultDatatype(),
       }]
-    }, [])
+    }, [] as ParsedColumn[])
 
     this.allColumns = this.parsedColumns.concat(undefinedColumns)
   }
 
-  defaultPropertyUrl(name) {
+  defaultPropertyUrl(name: string) {
     return {
       fill: () => {
         return this.baseIRI + '#' + encodeURI(name)
       },
-    }
+    } as unknown as URITemplate
   }
 
   defaultDatatype() {
-    return { base: this.ns.string.value }
+    return { base: this.ns.string }
   }
 }
-
-module.exports = TableSchema

@@ -1,9 +1,10 @@
-const fs = require('fs')
+import fs from 'fs'
 
-class MetadataBuilder {
-  static readFirstLine(filename) {
-    const stream = fs.createReadStream(filename)
-    const chunks = []
+export default class MetadataBuilder {
+  static readFirstLine(filename: string): Promise<string> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stream: any = fs.createReadStream(filename)
+    const chunks: Uint8Array[] = []
 
     return new Promise((resolve, reject) => {
       const next = () => {
@@ -30,21 +31,33 @@ class MetadataBuilder {
     })
   }
 
-  static detectDelimiter(line) {
+  static detectDelimiter(line: string) {
     const commaCount = line.split(',').length
     const tabCount = line.split('\t').length
 
     return commaCount > tabCount ? ',' : '\t'
   }
 
-  static extractHeaders(line, delimiter) {
+  static extractHeaders(line: string, delimiter: string) {
     return line.split(delimiter).map(header => {
       return header.split('"').join('').trim()
     })
   }
 
-  static build(baseIri, headers, { aboutUrl, delimiter = ',', propertyBaseIri = baseIri } = {}) {
-    const metadata = { '@context': 'http://www.w3.org/ns/csvw' }
+  static build(baseIri: string | undefined, headers: string[], { aboutUrl, delimiter = ',', propertyBaseIri = baseIri }: { aboutUrl?: string; delimiter?: string; propertyBaseIri?: string} = {}) {
+    const metadata: {
+      dialect?: {
+        delimiter: string
+      }
+      tableSchema?: {
+        aboutUrl: string
+        columns: {
+          titles: string
+          propertyUrl: string
+        }[]
+      }
+      '@context': string
+    } = { '@context': 'http://www.w3.org/ns/csvw' }
 
     if (delimiter !== ',') {
       metadata.dialect = {
@@ -69,18 +82,16 @@ class MetadataBuilder {
     return metadata
   }
 
-  static fromHeaderLine(firstLine, { aboutUrl, baseIri, delimiter, headers, propertyBaseIri } = {}) {
+  static fromHeaderLine(firstLine: string, { aboutUrl, baseIri, delimiter, headers, propertyBaseIri }: { aboutUrl?: string; baseIri?: string; delimiter?: string; headers?: string[]; propertyBaseIri?: string } = {}) {
     delimiter = delimiter || MetadataBuilder.detectDelimiter(firstLine)
     headers = headers || MetadataBuilder.extractHeaders(firstLine, delimiter)
 
-    return MetadataBuilder.build(baseIri, headers, { delimiter, propertyBaseIri })
+    return MetadataBuilder.build(baseIri, headers, { aboutUrl, delimiter, propertyBaseIri })
   }
 
-  static fromFile(filename, { aboutUrl, baseIri = `file:///${filename}/`, delimiter, headers, propertyBaseIri } = {}) {
+  static fromFile(filename: string, { aboutUrl, baseIri = `file:///${filename}/`, delimiter, headers, propertyBaseIri }: { aboutUrl?: string; baseIri?: string; delimiter?: string; headers?: string[]; propertyBaseIri?: string } = {}) {
     return MetadataBuilder.readFirstLine(filename).then(firstLine => {
       return MetadataBuilder.fromHeaderLine(firstLine, { aboutUrl, baseIri, delimiter, headers, propertyBaseIri })
     })
   }
 }
-
-module.exports = MetadataBuilder

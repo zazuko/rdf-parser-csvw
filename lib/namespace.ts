@@ -1,8 +1,7 @@
-const rdf = require('@rdfjs/data-model')
+import rdf from '@rdfjs/data-model'
+import type { DataFactory } from '@rdfjs/types'
 
-function namespace(factory) {
-  factory = factory || rdf
-
+export default function namespace(factory: DataFactory = rdf) {
   return {
     aboutUrl: factory.namedNode('http://www.w3.org/ns/csvw#aboutUrl'),
     base: factory.namedNode('http://www.w3.org/ns/csvw#base'),
@@ -40,4 +39,4 @@ function namespace(factory) {
   }
 }
 
-module.exports = namespace
+export type NS = ReturnType<typeof namespace>

@@ -1,0 +1,12 @@
+_:g32608600 <http://www.w3.org/ns/csvw#url> <test032-default-lang-tag.csv#row=2> .
+_:g32608600 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/csvw#Row> .
+_:g32608600 <http://www.w3.org/ns/csvw#describes> <http://example.org/id/234345> .
+_:g32608600 <http://www.w3.org/ns/csvw#rownum> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.org/id/234345> <http://vocab.example.org/string> "Der Tag ist noch lang"^^<http://schema.org/Text> .
+<http://example.org/id/234345> <http://vocab.example.org/id> "234345" .
+_:g32830000 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/csvw#TableGroup> .
+_:g32830000 <http://www.w3.org/ns/csvw#table> _:g32827900 .
+_:g32827900 <http://www.w3.org/ns/csvw#url> <test032-default-lang-tag.csv> .
+_:g32827900 <http://www.w3.org/ns/csvw#row> _:g32608600 .
+_:g32827900 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/csvw#Table> .
+

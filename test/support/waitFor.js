@@ -1,6 +1,6 @@
-const { finished } = require('readable-stream')
+import { finished } from 'readable-stream'
 
-function waitFor(stream) {
+export default function waitFor(stream) {
   return new Promise((resolve, reject) => {
     finished(stream, err => {
       if (err) {
@@ -11,5 +11,3 @@ function waitFor(stream) {
     })
   })
 }
-
-module.exports = waitFor

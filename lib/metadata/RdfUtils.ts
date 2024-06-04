@@ -1,4 +1,5 @@
-const rdf = require('@rdfjs/data-model')
+import rdf from '@rdfjs/data-model'
+import type { DatasetCore, NamedNode, Term } from '@rdfjs/types'
 
 const ns = {
   first: rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#first'),
@@ -6,8 +7,8 @@ const ns = {
   rest: rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'),
 }
 
-class RdfUtils {
-  static parseArray(dataset, root, array) {
+export default class RdfUtils {
+  static parseArray(dataset: DatasetCore, root: Term | undefined | null, array?: Term[]) {
     array = array || []
 
     if (!root) {
@@ -31,11 +32,11 @@ class RdfUtils {
     return array
   }
 
-  static findNode(dataset, root, property) {
+  static findNode(dataset: DatasetCore, root: Term | undefined | null, property: NamedNode) {
     return RdfUtils.findNodes(dataset, root, property).shift()
   }
 
-  static findNodes(dataset, root, property) {
+  static findNodes(dataset: DatasetCore, root: Term | undefined | null, property: NamedNode) {
     if (!dataset) {
       return []
     }
@@ -43,13 +44,11 @@ class RdfUtils {
     return [...dataset.match(root, property)].map(q => q.object)
   }
 
-  static findValue(dataset, root, property) {
+  static findValue(dataset: DatasetCore, root: Term | undefined | null, property: NamedNode) {
     return RdfUtils.findValues(dataset, root, property).shift()
   }
 
-  static findValues(dataset, root, property) {
+  static findValues(dataset: DatasetCore, root: Term | undefined | null, property: NamedNode) {
     return RdfUtils.findNodes(dataset, root, property).map(n => n.value)
   }
 }
-
-module.exports = RdfUtils
