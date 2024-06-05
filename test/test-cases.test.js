@@ -61,6 +61,7 @@ describe('test-cases', () => {
           baseIRI: path.basename(csvFile),
           metadata,
           timezone: 'UTC',
+          trimHeaders: true,
         })
         const input = fs.createReadStream(csvFile)
         const stream = parser.import(input)

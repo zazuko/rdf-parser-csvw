@@ -13,6 +13,7 @@ export interface Options {
   timezone?: string
   relaxColumnCount?: boolean
   skipLinesWithError?: boolean
+  trimHeaders?: boolean
 }
 
 export default class Parser {
@@ -22,14 +23,16 @@ export default class Parser {
   private readonly timezone: string | undefined
   private readonly relaxColumnCount: boolean | undefined
   private readonly skipLinesWithError: boolean | undefined
+  private readonly trimHeaders: boolean | undefined
 
-  constructor({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError }: Options) {
+  constructor({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError, trimHeaders }: Options) {
     this.metadata = metadata
     this.baseIRI = baseIRI
     this.factory = factory
     this.timezone = timezone
     this.relaxColumnCount = relaxColumnCount
     this.skipLinesWithError = skipLinesWithError
+    this.trimHeaders = trimHeaders
   }
 
   import(input: Readable, {
@@ -39,6 +42,7 @@ export default class Parser {
     timezone = this.timezone,
     relaxColumnCount = this.relaxColumnCount,
     skipLinesWithError = this.skipLinesWithError,
+    trimHeaders = this.trimHeaders,
   }: Partial<Options> = {}) {
     const parsedMetadata = parseMetadata(metadata, { baseIRI, factory, timezone })
 
@@ -48,6 +52,7 @@ export default class Parser {
       quoteChar: parsedMetadata.quoteChar,
       relaxColumnCount,
       skipLinesWithError,
+      trimHeaders,
     })
 
     const output = new ObjectParserTransform({ baseIRI, factory, metadata: parsedMetadata, timezone })
