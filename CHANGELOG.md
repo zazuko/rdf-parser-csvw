@@ -1,5 +1,11 @@
 # @zazuko/rdf-parser-csvw
 
+## 0.16.2
+
+### Patch Changes
+
+- 36d0da8: `skipEmptyLines` was still not there
+
 ## 0.16.1
 
 ### Patch Changes
