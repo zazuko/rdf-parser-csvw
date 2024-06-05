@@ -8,7 +8,9 @@ import N3Parser from '@rdfjs/parser-n3'
 import CsvwParser from '../index.js'
 import rdf from './support/factory.js'
 
-const blackList = [
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+
+const blackList = new Set([
   'manifest-rdf#test016',
   'manifest-rdf#test023',
   'manifest-rdf#test027',
@@ -55,7 +57,7 @@ const blackList = [
   'manifest-rdf#test305',
   'manifest-rdf#test306',
   'manifest-rdf#test307',
-]
+])
 
 function datasetFromN3Fs(filename) {
   const parser = new N3Parser({ baseIRI: new String('') }) // eslint-disable-line no-new-wrappers
@@ -70,7 +72,7 @@ function datasetFromJsonLdFs(filename) {
 }
 
 function loadTests() {
-  const manifestFile = 'test/spec/manifest-rdf.ttl'
+  const manifestFile = 'test/spec/tests/manifest-rdf.ttl'
 
   try {
     fs.readFileSync(manifestFile)
@@ -79,7 +81,7 @@ function loadTests() {
   }
 
   return datasetFromN3Fs(manifestFile).then((manifest) => {
-    let tests = [...manifest.match(
+    const tests = [...manifest.match(
       null,
       rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
       rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#ToRdfTest'),
@@ -118,19 +120,14 @@ function loadTests() {
         input,
         metadata,
         result,
+        blacklisted: blackList.has(test.value),
       }
     })
-
-    if (typeof blackList !== 'undefined') {
-      tests = tests.filter((test) => {
-        return blackList.indexOf(test.iri) === -1
-      })
-    }
 
     return Promise.all(tests.map((test) => {
       if (test.metadata) {
         if (path.extname(test.metadata) === '.json') {
-          return datasetFromJsonLdFs(path.join(__dirname, 'spec', test.metadata)).then((metadata) => {
+          return datasetFromJsonLdFs(path.join(__dirname, 'spec/tests', test.metadata)).then((metadata) => {
             test.metadata = metadata
 
             return test
@@ -143,19 +140,23 @@ function loadTests() {
   })
 }
 
-loadTests().then((tests) => {
+(async () => {
+  const tests = await loadTests()
+
   describe('W3C spec tests', () => {
-    tests.forEach((test) => {
-      it(test.label, () => {
+    for (const test of tests) {
+      const testCase = test.blacklisted ? it.skip : it
+
+      testCase(test.label, () => {
         const parser = new CsvwParser({ factory: rdf })
-        const input = fs.createReadStream('test/spec/' + test.input)
+        const input = fs.createReadStream('test/spec/tests/' + test.input)
         const stream = parser.import(input, {
           baseIRI: path.basename(test.input),
           metadata: test.metadata,
         })
 
         return Promise.all([
-          datasetFromN3Fs('test/spec/' + test.result),
+          datasetFromN3Fs('test/spec/tests/' + test.result),
           fromStream(rdf.dataset(), stream),
         ]).then((results) => {
           const expected = results[0]
@@ -164,8 +165,8 @@ loadTests().then((tests) => {
           assert.strictEqual(toCanonical(actual), toCanonical(expected))
         })
       })
-    })
+    }
   })
-}).catch((err) => {
-  console.error(err.stack)
-})
+
+  run()
+})()

@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --quiet",
-    "test": "mocha",
+    "test": "mocha --ignore test/spec.test.js",
+    "test:w3c": "mocha test/spec.test.js --delay",
     "release": "changeset publish",
     "prepack": "tsc"
   },
