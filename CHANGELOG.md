@@ -1,5 +1,11 @@
 # @zazuko/rdf-parser-csvw
 
+## 0.16.3
+
+### Patch Changes
+
+- 320b4e0: Allow `DatasetCore` passed to `ObjectParserTransform`
+
 ## 0.16.2
 
 ### Patch Changes
