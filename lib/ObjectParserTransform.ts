@@ -1,6 +1,6 @@
 import rdf from '@rdfjs/data-model'
 import { Transform } from 'readable-stream'
-import type { BlankNode, DataFactory, NamedNode, Quad } from '@rdfjs/types'
+import type { BlankNode, DataFactory, DatasetCore, NamedNode, Quad } from '@rdfjs/types'
 import parseMetadata from './metadata/index.js'
 import namespace, { NS } from './namespace.js'
 import TableSchema from './metadata/TableSchema.js'
@@ -9,7 +9,7 @@ import Metadata from './metadata/Metadata.js'
 interface Options {
   baseIRI?: string
   factory?: DataFactory
-  metadata?: Metadata
+  metadata?: Metadata | DatasetCore
   tableSchema?: TableSchema
   timezone?: string
 }
