@@ -10,7 +10,7 @@ import rdf from './support/factory.js'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
-const blackList = [
+const blackList = new Set([
   'manifest-rdf#test016',
   'manifest-rdf#test023',
   'manifest-rdf#test027',
@@ -57,7 +57,7 @@ const blackList = [
   'manifest-rdf#test305',
   'manifest-rdf#test306',
   'manifest-rdf#test307',
-]
+])
 
 function datasetFromN3Fs(filename) {
   const parser = new N3Parser({ baseIRI: new String('') }) // eslint-disable-line no-new-wrappers
@@ -81,7 +81,7 @@ function loadTests() {
   }
 
   return datasetFromN3Fs(manifestFile).then((manifest) => {
-    let tests = [...manifest.match(
+    const tests = [...manifest.match(
       null,
       rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
       rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#ToRdfTest'),
@@ -120,14 +120,9 @@ function loadTests() {
         input,
         metadata,
         result,
+        blacklisted: blackList.has(test.value),
       }
     })
-
-    if (typeof blackList !== 'undefined') {
-      tests = tests.filter((test) => {
-        return blackList.indexOf(test.iri) === -1
-      })
-    }
 
     return Promise.all(tests.map((test) => {
       if (test.metadata) {
@@ -150,7 +145,9 @@ function loadTests() {
 
   describe('W3C spec tests', () => {
     for (const test of tests) {
-      it(test.label, () => {
+      const testCase = test.blacklisted ? it.skip : it
+
+      testCase(test.label, () => {
         const parser = new CsvwParser({ factory: rdf })
         const input = fs.createReadStream('test/spec/tests/' + test.input)
         const stream = parser.import(input, {
