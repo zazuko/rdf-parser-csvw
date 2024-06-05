@@ -40,7 +40,7 @@ function datasetFromJsonLdFs(filename) {
 }
 
 describe('test-cases', () => {
-  glob.sync('test/support/test034*.csv').forEach((csvFile) => {
+  glob.sync('test/support/test*.csv').forEach((csvFile) => {
     const basePath = path.dirname(csvFile)
     const baseName = path.basename(csvFile, '.csv')
     const metadataFile = path.join(basePath, baseName + '.csv-metadata.json')
