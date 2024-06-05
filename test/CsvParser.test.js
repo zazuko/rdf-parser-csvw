@@ -146,7 +146,7 @@ describe('csvParser', () => {
 
   it('should allow trimming of whitespace in headers', () => {
     const input = new PassThrough()
-    const parser = new CsvParser({ lineTerminators: ['\r\n'] })
+    const parser = new CsvParser({ lineTerminators: ['\r\n'], trimHeaders: true })
 
     input.pipe(parser)
 
