@@ -67,6 +67,7 @@
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
     "eslint-import-resolver-typescript": "^3.6.1",
+    "c8": "^9.1.0",
     "get-stream": "^9.0.1",
     "glob": "^10.4.1",
     "mocha": "^10.4.0",
