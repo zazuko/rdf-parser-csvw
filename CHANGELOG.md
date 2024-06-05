@@ -1,5 +1,11 @@
 # @zazuko/rdf-parser-csvw
 
+## 0.16.4
+
+### Patch Changes
+
+- b539998: Include types for `uri-templates`
+
 ## 0.16.3
 
 ### Patch Changes

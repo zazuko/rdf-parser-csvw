@@ -1,6 +1,6 @@
 {
   "name": "@zazuko/rdf-parser-csvw",
-  "version": "0.16.3",
+  "version": "0.16.4",
   "description": "CSV on the Web parser",
   "main": "index.js",
   "type": "module",
