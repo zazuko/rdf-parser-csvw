@@ -205,11 +205,11 @@ export default class TableSchema {
       return this.factory.namedNode(column.valueUrl.fill(row))
     }
 
-    let value = column.titles.reduce((value, title) => {
+    let value: string | undefined = column.titles.reduce((value, title) => {
       return value || row[title]
     }, '')
 
-    if (value === '' && column.defaultValue) {
+    if (value === '') {
       value = column.defaultValue
     }
 
