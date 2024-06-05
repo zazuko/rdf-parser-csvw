@@ -1,5 +1,11 @@
 # @zazuko/rdf-parser-csvw
 
+## 0.16.1
+
+### Patch Changes
+
+- 6ef1200: The `skipEmptyLines` parameter was missing at the top interface level
+
 ## 0.16.0
 
 ### Minor Changes
