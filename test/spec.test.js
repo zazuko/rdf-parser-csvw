@@ -8,6 +8,8 @@ import N3Parser from '@rdfjs/parser-n3'
 import CsvwParser from '../index.js'
 import rdf from './support/factory.js'
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+
 const blackList = [
   'manifest-rdf#test016',
   'manifest-rdf#test023',
@@ -70,7 +72,7 @@ function datasetFromJsonLdFs(filename) {
 }
 
 function loadTests() {
-  const manifestFile = 'test/spec/manifest-rdf.ttl'
+  const manifestFile = 'test/spec/tests/manifest-rdf.ttl'
 
   try {
     fs.readFileSync(manifestFile)
@@ -130,7 +132,7 @@ function loadTests() {
     return Promise.all(tests.map((test) => {
       if (test.metadata) {
         if (path.extname(test.metadata) === '.json') {
-          return datasetFromJsonLdFs(path.join(__dirname, 'spec', test.metadata)).then((metadata) => {
+          return datasetFromJsonLdFs(path.join(__dirname, 'spec/tests', test.metadata)).then((metadata) => {
             test.metadata = metadata
 
             return test
@@ -143,19 +145,21 @@ function loadTests() {
   })
 }
 
-loadTests().then((tests) => {
+(async () => {
+  const tests = await loadTests()
+
   describe('W3C spec tests', () => {
-    tests.forEach((test) => {
+    for (const test of tests) {
       it(test.label, () => {
         const parser = new CsvwParser({ factory: rdf })
-        const input = fs.createReadStream('test/spec/' + test.input)
+        const input = fs.createReadStream('test/spec/tests/' + test.input)
         const stream = parser.import(input, {
           baseIRI: path.basename(test.input),
           metadata: test.metadata,
         })
 
         return Promise.all([
-          datasetFromN3Fs('test/spec/' + test.result),
+          datasetFromN3Fs('test/spec/tests/' + test.result),
           fromStream(rdf.dataset(), stream),
         ]).then((results) => {
           const expected = results[0]
@@ -164,8 +168,8 @@ loadTests().then((tests) => {
           assert.strictEqual(toCanonical(actual), toCanonical(expected))
         })
       })
-    })
+    }
   })
-}).catch((err) => {
-  console.error(err.stack)
-})
+
+  run()
+})()
