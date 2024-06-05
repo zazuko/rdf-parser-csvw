@@ -144,6 +144,35 @@ describe('csvParser', () => {
     })
   })
 
+  it('should allow trimming of whitespace in headers', () => {
+    const input = new PassThrough()
+    const parser = new CsvParser({ lineTerminators: ['\r\n'] })
+
+    input.pipe(parser)
+
+    const output = []
+    const expected = [{
+      line: 2,
+      row: {
+        key0: 'value0',
+        key1: 'value1',
+        key2: 'value2',
+      },
+    }]
+
+    parser.on('data', (data) => {
+      output.push(data)
+    })
+
+    input.write('key0 , key1,"\tkey2\t"\r\n')
+    input.write('value0,value1,value2\r\n')
+    input.end()
+
+    return waitFor(parser).then(() => {
+      assert.deepStrictEqual(output, expected)
+    })
+  })
+
   it('should handle errors', async () => {
     const input = new PassThrough()
     const parser = new CsvParser({ delimiter: ';' })

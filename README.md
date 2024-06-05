@@ -24,9 +24,11 @@ The constructor accepts an `options` object with the following optional keys:
 - `timezone`: Use an alternative timezone to parse date and time values.
   The value must be given as a String as defined in the [Luxon documentation](https://moment.github.io/luxon/docs/manual/zones.html#specifying-a-zone).
   By default `local` will be used.
-- `relaxColumnCount`: Don't throw an error if a row has a column count which doesn't match the headers column coun.
+- `relaxColumnCount`: Don't throw an error if a row has a column count which doesn't match the headers column count.
 - `skipLinesWithError`: Skip lines with error instead of throwing an error and stop parsing.
   This is mainly useful for debugging and should not be used in production environments.
+- `skipEmptyLines`: Ignore empty lines in the CSV file.
+- `trimHeaders`: Remove whitespace from the beginning and end of the column names.
 
 It's also possible to pass options as second argument to the `.import` method.
 The options from the constructor and the `.import` method will be merged together.

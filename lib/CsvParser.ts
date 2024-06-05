@@ -8,18 +8,23 @@ interface Options {
   relaxColumnCount?: boolean
   skipLinesWithError?: boolean
   skipEmptyLines?: boolean
+  trimHeaders?: boolean
 }
 
 export default class CsvParser extends Transform {
   parser: Parser
 
-  constructor({ delimiter, lineTerminators, quoteChar, relaxColumnCount, skipLinesWithError, skipEmptyLines = true }: Options = {}) {
+  constructor({ delimiter, lineTerminators, quoteChar, relaxColumnCount, skipLinesWithError, skipEmptyLines = true, trimHeaders }: Options = {}) {
     super({
       readableObjectMode: true,
     })
 
+    const columns = trimHeaders
+      ? (header: string[]) => header.map(column => column.trim())
+      : true
+
     this.parser = new Parser({
-      columns: true,
+      columns,
       delimiter,
       info: true,
       bom: true,
