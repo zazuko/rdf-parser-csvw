@@ -2,4 +2,4 @@
 "@zazuko/rdf-parser-csvw": minor
 ---
 
-Require theRDF/JS factory to be an environment with `clownface`
+Require the RDF/JS factory to be an environment with `clownface`
