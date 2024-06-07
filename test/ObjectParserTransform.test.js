@@ -100,4 +100,39 @@ describe('ObjectParserTransform', () => {
       assert.strictEqual(toCanonical(actual), toCanonical(expected))
     })
   })
+
+  it('should output date/time at face value if parsing fails', async () => {
+    const input = new PassThrough({ objectMode: true })
+    const metadata = rdf.clownface()
+      .blankNode()
+      .addOut(rdf.ns.csvw.tableSchema, (table) => {
+        const column = table.blankNode()
+        column
+          .addOut(rdf.ns.csvw.title, 'key1')
+          .addOut(rdf.ns.csvw.datatype, dt => {
+            dt.addOut(rdf.ns.csvw.base, 'dateTime')
+          })
+        table.addList(rdf.ns.csvw.column, [column])
+      })
+    const parser = new ObjectParserTransform({
+      metadata: metadata.dataset,
+      factory: rdf
+    })
+
+    input.pipe(parser)
+
+    input.write({
+      line: 2,
+      row: {
+        key0: 'value0',
+        key1: 'not a date',
+      },
+    })
+
+    input.end()
+
+    const dataset = await fromStream(rdf.dataset(), parser)
+    const [{ object }] = dataset.match(null, rdf.namedNode('#key1'))
+    assert(object.equals(rdf.literal('not a date', rdf.ns.xsd.dateTime)))
+  })
 })

@@ -1,5 +1,3 @@
-import Environment from '@rdfjs/environment'
-import DataModelFactory from '@rdfjs/data-model/Factory.js'
-import DatasetFactory from '@rdfjs/dataset/Factory.js'
+import rdf from '@zazuko/env'
 
-export default new Environment([DataModelFactory, DatasetFactory])
+export default rdf
