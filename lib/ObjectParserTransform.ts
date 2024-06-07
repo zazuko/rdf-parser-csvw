@@ -1,14 +1,14 @@
-import rdf from '@rdfjs/data-model'
 import { Transform } from 'readable-stream'
-import type { BlankNode, DataFactory, DatasetCore, NamedNode, Quad } from '@rdfjs/types'
+import type { BlankNode,  DatasetCore, NamedNode, Quad } from '@rdfjs/types'
 import parseMetadata from './metadata/index.js'
 import namespace, { NS } from './namespace.js'
 import TableSchema from './metadata/TableSchema.js'
 import Metadata from './metadata/Metadata.js'
+import rdf, {Factory} from './Factory.js';
 
 interface Options {
   baseIRI?: string
-  factory?: DataFactory
+  factory?: Factory
   metadata?: Metadata | DatasetCore
   tableSchema?: TableSchema
   timezone?: string
@@ -16,7 +16,7 @@ interface Options {
 
 export default class ObjectParserTransform extends Transform {
   private readonly baseIRI: string
-  private readonly factory: DataFactory
+  private readonly factory: Factory
   private readonly timezone: string | undefined
   private ns: NS
   private contentLine: number
@@ -24,7 +24,6 @@ export default class ObjectParserTransform extends Transform {
   private tableNode: NamedNode | BlankNode
   private tableSchema: TableSchema
   private parsedMetadata: Metadata
-  private columns: [] | null
 
   constructor({ baseIRI = '', factory = rdf, metadata, tableSchema, timezone }: Options = {}) {
     super({
@@ -43,7 +42,6 @@ export default class ObjectParserTransform extends Transform {
     this.tableSchema = tableSchema || this.parsedMetadata.tableSchemas[0]
 
     this.contentLine = 0
-    this.columns = null
     this.tableGroupNode = this.factory.blankNode()
     this.tableNode = this.factory.blankNode()
 
