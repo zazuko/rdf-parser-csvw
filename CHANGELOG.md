@@ -1,5 +1,11 @@
 # @zazuko/rdf-parser-csvw
 
+## 0.16.5
+
+### Patch Changes
+
+- e63e327: Given an invalid date, the would produce unexpected literals `"Invalid Date"^^xsd:dateTime`
+
 ## 0.16.4
 
 ### Patch Changes
