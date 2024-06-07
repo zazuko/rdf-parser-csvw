@@ -218,11 +218,13 @@ export default class TableSchema {
     }
 
     if (this.ns.dateTime.equals(column.datatype.base)) {
-      return this.factory.literal(parseDateTime(value, column.datatype.format, this.timezone).toISO()!, this.ns.dateTime)
+      const date = parseDateTime(value, column.datatype.format, this.timezone)
+      return this.factory.literal(date ? date.toISO()! : value, this.ns.dateTime)
     }
 
-    if (column.datatype.base.value === this.ns.date.value) {
-      return this.factory.literal(parseDateTime(value, column.datatype.format, this.timezone).toFormat('yyyy-MM-dd'), this.ns.date)
+    if (this.ns.date.equals(column.datatype.base)) {
+      const date = parseDateTime(value, column.datatype.format, this.timezone)
+      return this.factory.literal(date ? date.toFormat('yyyy-MM-dd') : value, this.ns.date)
     }
 
     if (column.datatype.base) {
