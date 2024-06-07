@@ -2,18 +2,19 @@
 import URL from 'url'
 import difference from 'lodash/difference.js'
 import uriTemplate, { URITemplate } from 'uri-templates'
-import type { BlankNode, DataFactory, DatasetCore, NamedNode, Quad_Object, Term } from '@rdfjs/types'
+import type { BlankNode, DatasetCore, NamedNode, Quad_Object, Term } from '@rdfjs/types'
+import type { GraphPointer } from 'clownface'
 import namespace, { NS } from '../namespace.js'
 import parseDateTime from '../parseDateTime.js'
-import RdfUtils from './RdfUtils.js'
+import { Factory } from '../Factory.js'
 
 const defaultColumnNames = new Set(['_column', '_sourceColumn', '_row', '_sourceRow', '_name'])
 
 interface Options {
   baseIRI: string
-  factory: DataFactory
+  factory: Factory
   timezone?: string
-  root?: Term
+  root?: Term | GraphPointer
 }
 
 type Row = Record<string, string>
@@ -44,10 +45,9 @@ interface Column {
 }
 
 export default class TableSchema {
-  private readonly factory: DataFactory
+  private readonly factory: Factory
   private readonly ns: NS
-  private readonly dataset: DatasetCore
-  private readonly root: Term | undefined
+  private readonly root: GraphPointer | undefined
   private readonly baseIRI: string
   private readonly timezone: string | undefined
   private parsedColumns: ParsedColumn[]
@@ -56,10 +56,11 @@ export default class TableSchema {
   propertyUrl?: URITemplate
 
   constructor(dataset: DatasetCore, { root, baseIRI, factory, timezone }: Options) {
+    const graph = factory.clownface({ dataset })
+
     this.factory = factory
     this.ns = namespace(this.factory)
-    this.dataset = dataset
-    this.root = root || RdfUtils.findNode(this.dataset, null, this.ns.tableSchema)
+    this.root = root ? graph.node(root) : graph.has(this.ns.tableSchema).out(this.ns.tableSchema).toArray().shift()
     this.baseIRI = baseIRI
     this.timezone = timezone
 
@@ -70,7 +71,7 @@ export default class TableSchema {
     this.parsedColumns = []
     this.allColumns = null
 
-    if (this.dataset) {
+    if (dataset) {
       this.aboutUrl = this.parseAboutUrl() || this.aboutUrl
       this.propertyUrl = this.parsePropertyUrl()
       this.parseColumns()
@@ -78,7 +79,7 @@ export default class TableSchema {
   }
 
   parseAboutUrl() {
-    const aboutUrl = RdfUtils.findValue(this.dataset, this.root, this.ns.aboutUrl)
+    const aboutUrl =  this.root?.out(this.ns.aboutUrl).value
 
     if (!aboutUrl) {
       return
@@ -92,7 +93,7 @@ export default class TableSchema {
   }
 
   parsePropertyUrl() {
-    const url = RdfUtils.findValue(this.dataset, this.root, this.ns.propertyUrl)
+    const url = this.root?.out(this.ns.propertyUrl).value
 
     if (!url) {
       return
@@ -102,26 +103,26 @@ export default class TableSchema {
   }
 
   parseColumns() {
-    const columnNode = RdfUtils.findNode(this.dataset, this.root, this.ns.column)
+    const columnNodes = [...this.root?.out(this.ns.column).list() || []]
 
-    this.parsedColumns = RdfUtils.parseArray(this.dataset, columnNode).map((node) => {
-      const titles = RdfUtils.findValues(this.dataset, node, this.ns.title)
-      const name = RdfUtils.findValue(this.dataset, node, this.ns.name) || titles[0]
-      const aboutUrl = RdfUtils.findValue(this.dataset, node, this.ns.aboutUrl)
-      const language = RdfUtils.findValue(this.dataset, node, this.ns.lang)
-      const nullValue = RdfUtils.findValue(this.dataset, node, this.ns.null) || ''
-      const defaultValue = RdfUtils.findValue(this.dataset, node, this.ns.default)
-      const propertyUrl = RdfUtils.findValue(this.dataset, node, this.ns.propertyUrl)
-      const suppressOutput = RdfUtils.findValue(this.dataset, node, this.ns.suppressOutput)
-      const virtual = RdfUtils.findValue(this.dataset, node, this.ns.virtual)
-      const valueUrl = RdfUtils.findValue(this.dataset, node, this.ns.valueUrl)
+    this.parsedColumns = columnNodes.map((node: GraphPointer) => {
+      const titles = node.out(this.ns.title).values
+      const name = node.out(this.ns.name).value || titles[0]
+      const aboutUrl = node.out(this.ns.aboutUrl).value
+      const language = node.out(this.ns.lang).value
+      const nullValue = node.out(this.ns.null).value || ''
+      const defaultValue = node.out(this.ns.default).value
+      const propertyUrl = node.out(this.ns.propertyUrl).value
+      const suppressOutput = node.out(this.ns.suppressOutput).value
+      const virtual = node.out(this.ns.virtual).value
+      const valueUrl = node.out(this.ns.valueUrl).value
 
       const column: ParsedColumn = {
-        datatype: this.parseDatatype(node),
+        datatype: this.parseDatatype(node.term),
         name,
         nullValue,
         defaultValue,
-        propertyUrl: (propertyUrl && uriTemplate(propertyUrl)) || this.propertyUrl || this.defaultPropertyUrl(name),
+        propertyUrl: propertyUrl && uriTemplate(propertyUrl) || this.propertyUrl || this.defaultPropertyUrl(name),
         suppressOutput: suppressOutput === 'true',
         titles,
         virtual,
@@ -142,18 +143,18 @@ export default class TableSchema {
   }
 
   parseDatatype(node: Term): Datatype {
-    const datatype = RdfUtils.findNode(this.dataset, node, this.ns.datatype)
+    const datatype = this.root?.node(node).out(this.ns.datatype)
 
     if (!datatype) {
       return this.defaultDatatype()
     }
 
-    if (datatype.termType === 'NamedNode') {
-      return { base: datatype }
+    if (datatype.term?.termType === 'NamedNode') {
+      return { base: datatype.term }
     }
 
-    const base = RdfUtils.findValue(this.dataset, datatype, this.ns.base)
-    const format = RdfUtils.findValue(this.dataset, datatype, this.ns.format)
+    const base =  datatype.out(this.ns.base).value
+    const format = datatype.out(this.ns.format).value
 
     return {
       base: this.factory.namedNode('http://www.w3.org/2001/XMLSchema#' + (base || 'string')),

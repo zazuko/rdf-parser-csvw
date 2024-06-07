@@ -1,15 +1,15 @@
 import type { Readable } from 'stream'
-import rdf from '@rdfjs/data-model'
-import type { DataFactory, DatasetCore } from '@rdfjs/types'
+import type {  DatasetCore } from '@rdfjs/types'
 import CsvParser from './lib/CsvParser.js'
 import parseMetadata from './lib/metadata/index.js'
 import ObjectParserTransform from './lib/ObjectParserTransform.js'
 import Metadata from './lib/metadata/Metadata.js'
+import rdf, {Factory} from './lib/Factory.js';
 
 export interface Options {
   baseIRI?: string
   metadata: Metadata | DatasetCore
-  factory?: DataFactory
+  factory?: Factory
   timezone?: string
   relaxColumnCount?: boolean
   skipLinesWithError?: boolean
@@ -20,7 +20,7 @@ export interface Options {
 export default class Parser {
   private readonly metadata: Metadata | DatasetCore
   private readonly baseIRI: string
-  private readonly factory: DataFactory
+  private readonly factory: Factory
   private readonly timezone: string | undefined
   private readonly relaxColumnCount: boolean | undefined
   private readonly skipLinesWithError: boolean | undefined

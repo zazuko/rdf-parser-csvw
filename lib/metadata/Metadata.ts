@@ -1,15 +1,16 @@
-import type { DataFactory, DatasetCore } from '@rdfjs/types'
+import type {  DatasetCore } from '@rdfjs/types'
 import namespace, { NS } from '../namespace.js'
 import TableSchema from './TableSchema.js'
+import {Factory} from '../Factory.js';
 
 interface Options {
   baseIRI: string
-  factory: DataFactory
+  factory: Factory
   timezone?: string
 }
 
 export default class Metadata {
-  factory: DataFactory
+  factory: Factory
   dataset: DatasetCore
   baseIRI: string
   timezone?: string

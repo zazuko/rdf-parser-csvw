@@ -1,10 +1,11 @@
-import type { DataFactory, DatasetCore } from '@rdfjs/types'
+import type {  DatasetCore } from '@rdfjs/types'
 import rdf from '@rdfjs/dataset'
 import Metadata from './Metadata.js'
+import {Factory} from '../Factory.js';
 
 interface Options {
   baseIRI: string
-  factory: DataFactory
+  factory: Factory
   timezone?: string
 }
 
