@@ -116,7 +116,7 @@ describe('ObjectParserTransform', () => {
       })
     const parser = new ObjectParserTransform({
       metadata: metadata.dataset,
-      factory: rdf
+      factory: rdf,
     })
 
     input.pipe(parser)
