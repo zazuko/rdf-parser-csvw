@@ -79,7 +79,7 @@ export default class TableSchema {
   }
 
   parseAboutUrl() {
-    const aboutUrl =  this.root?.out(this.ns.aboutUrl).value
+    const aboutUrl = this.root?.out(this.ns.aboutUrl).value
 
     if (!aboutUrl) {
       return
@@ -122,7 +122,7 @@ export default class TableSchema {
         name,
         nullValue,
         defaultValue,
-        propertyUrl: propertyUrl && uriTemplate(propertyUrl) || this.propertyUrl || this.defaultPropertyUrl(name),
+        propertyUrl: (propertyUrl && uriTemplate(propertyUrl)) || this.propertyUrl || this.defaultPropertyUrl(name),
         suppressOutput: suppressOutput === 'true',
         titles,
         virtual,
@@ -153,7 +153,7 @@ export default class TableSchema {
       return { base: datatype.term }
     }
 
-    const base =  datatype.out(this.ns.base).value
+    const base = datatype.out(this.ns.base).value
     const format = datatype.out(this.ns.format).value
 
     return {

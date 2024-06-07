@@ -1,10 +1,10 @@
 import { Transform } from 'readable-stream'
-import type { BlankNode,  DatasetCore, NamedNode, Quad } from '@rdfjs/types'
+import type { BlankNode, DatasetCore, NamedNode, Quad } from '@rdfjs/types'
 import parseMetadata from './metadata/index.js'
 import namespace, { NS } from './namespace.js'
 import TableSchema from './metadata/TableSchema.js'
 import Metadata from './metadata/Metadata.js'
-import rdf, {Factory} from './Factory.js';
+import rdf, { Factory } from './Factory.js'
 
 interface Options {
   baseIRI?: string

@@ -1,7 +1,7 @@
-import type {  DatasetCore } from '@rdfjs/types'
+import type { DatasetCore } from '@rdfjs/types'
 import namespace, { NS } from '../namespace.js'
+import { Factory } from '../Factory.js'
 import TableSchema from './TableSchema.js'
-import {Factory} from '../Factory.js';
 
 interface Options {
   baseIRI: string
