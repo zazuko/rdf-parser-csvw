@@ -1,7 +1,7 @@
-import type {  DatasetCore } from '@rdfjs/types'
+import type { DatasetCore } from '@rdfjs/types'
 import rdf from '@rdfjs/dataset'
+import { Factory } from '../Factory.js'
 import Metadata from './Metadata.js'
-import {Factory} from '../Factory.js';
 
 interface Options {
   baseIRI: string
