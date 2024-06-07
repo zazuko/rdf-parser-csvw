@@ -222,7 +222,7 @@ export default class TableSchema {
       return this.factory.literal(date ? date.toISO()! : value, this.ns.dateTime)
     }
 
-    if (column.datatype.base.value === this.ns.date.value) {
+    if (this.ns.date.equals(column.datatype.base)) {
       const date = parseDateTime(value, column.datatype.format, this.timezone)
       return this.factory.literal(date ? date.toFormat('yyyy-MM-dd') : value, this.ns.date)
     }
