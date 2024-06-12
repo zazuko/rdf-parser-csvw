@@ -9,6 +9,7 @@ export default function namespace(factory: DataFactory = rdf) {
     column: factory.namedNode('http://www.w3.org/ns/csvw#column'),
     datatype: factory.namedNode('http://www.w3.org/ns/csvw#datatype'),
     date: factory.namedNode('http://www.w3.org/2001/XMLSchema#date'),
+    time: factory.namedNode('http://www.w3.org/2001/XMLSchema#time'),
     dateTime: factory.namedNode('http://www.w3.org/2001/XMLSchema#dateTime'),
     default: factory.namedNode('http://www.w3.org/ns/csvw#default'),
     delimiter: factory.namedNode('http://www.w3.org/ns/csvw#delimiter'),

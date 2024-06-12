@@ -44,6 +44,18 @@ interface Column {
   value: Quad_Object
 }
 
+const xsd = 'http://www.w3.org/2001/XMLSchema#'
+const rdfs = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+const builtInTypes = new Map<string | undefined, string>([
+  ['number', `${xsd}double`],
+  ['binary', `${xsd}base64Binary`],
+  ['datetime', `${xsd}dateTime`],
+  ['any', `${xsd}anyAtomicType`],
+  ['xml', `${rdfs}XMLLiteral`],
+  ['html', `${rdfs}HTML`],
+  ['json', 'http://www.w3.org/ns/csvw#JSON'],
+])
+
 export default class TableSchema {
   private readonly factory: Factory
   private readonly ns: NS
@@ -153,11 +165,16 @@ export default class TableSchema {
       return { base: datatype.term }
     }
 
-    const base = datatype.out(this.ns.base).value
+    const baseString = datatype.out(this.ns.base).value
     const format = datatype.out(this.ns.format).value
 
+    let base = builtInTypes.get(baseString)
+    if (!base) {
+      base = xsd + (baseString || 'string')
+    }
+
     return {
-      base: this.factory.namedNode('http://www.w3.org/2001/XMLSchema#' + (base || 'string')),
+      base: this.factory.namedNode(base),
       format,
     }
   }
@@ -218,14 +235,19 @@ export default class TableSchema {
       return undefined
     }
 
-    if (this.ns.dateTime.equals(column.datatype.base)) {
+    if (this.ns.dateTime.equals(column.datatype.base) && column.datatype.format) {
       const date = parseDateTime(value, column.datatype.format, this.timezone)
-      return this.factory.literal(date ? date.toISO()! : value, this.ns.dateTime)
+      return this.factory.literal(date?.toISO() ?? value, this.ns.dateTime)
     }
 
-    if (this.ns.date.equals(column.datatype.base)) {
+    if (this.ns.date.equals(column.datatype.base) && column.datatype.format) {
       const date = parseDateTime(value, column.datatype.format, this.timezone)
       return this.factory.literal(date ? date.toFormat('yyyy-MM-dd') : value, this.ns.date)
+    }
+
+    if (this.ns.time.equals(column.datatype.base) && column.datatype.format) {
+      const date = parseDateTime(value, column.datatype.format, this.timezone)
+      return this.factory.literal(date?.toISOTime({ suppressMilliseconds: true }) || value, this.ns.date)
     }
 
     if (column.datatype.base) {
@@ -259,7 +281,7 @@ export default class TableSchema {
   defaultPropertyUrl(name: string) {
     return {
       fill: () => {
-        return this.baseIRI + '#' + encodeURI(name)
+        return this.baseIRI + '#' + encodeURIComponent(name).replace(/-/g, '%2D')
       },
     } as unknown as URITemplate
   }

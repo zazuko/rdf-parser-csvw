@@ -35,17 +35,13 @@ const blackList = new Set([
   'manifest-rdf#test170',
   'manifest-rdf#test171',
   'manifest-rdf#test183',
-  'manifest-rdf#test187',
-  'manifest-rdf#test188',
   'manifest-rdf#test189',
-  'manifest-rdf#test190',
   'manifest-rdf#test228',
   'manifest-rdf#test229',
   'manifest-rdf#test235',
   'manifest-rdf#test236',
   'manifest-rdf#test237',
   'manifest-rdf#test245',
-  'manifest-rdf#test246',
   'manifest-rdf#test263',
   'manifest-rdf#test264',
   'manifest-rdf#test268',
@@ -57,6 +53,10 @@ const blackList = new Set([
   'manifest-rdf#test305',
   'manifest-rdf#test306',
   'manifest-rdf#test307',
+])
+
+const whiteList = new Set([
+  'manifest-rdf#test190',
 ])
 
 function datasetFromN3Fs(filename) {
@@ -121,6 +121,7 @@ function loadTests() {
         metadata,
         result,
         blacklisted: blackList.has(test.value),
+        whitelisted: whiteList.has(test.value),
       }
     })
 
@@ -145,7 +146,12 @@ function loadTests() {
 
   describe('W3C spec tests', () => {
     for (const test of tests) {
-      const testCase = test.blacklisted ? it.skip : it
+      let testCase = it
+      if (test.blacklisted) {
+        testCase = it.skip
+      } else if (test.whitelisted) {
+        testCase = it.only
+      }
 
       testCase(test.label, () => {
         const parser = new CsvwParser({ factory: rdf })
