@@ -35,7 +35,9 @@ const blackList = new Set([
   'manifest-rdf#test170',
   'manifest-rdf#test171',
   'manifest-rdf#test183',
+  'manifest-rdf#test188', // date/time
   'manifest-rdf#test189',
+  'manifest-rdf#test190', // date/time
   'manifest-rdf#test228',
   'manifest-rdf#test229',
   'manifest-rdf#test235',
@@ -56,7 +58,6 @@ const blackList = new Set([
 ])
 
 const whiteList = new Set([
-  'manifest-rdf#test190',
 ])
 
 function datasetFromN3Fs(filename) {
@@ -149,7 +150,8 @@ function loadTests() {
       let testCase = it
       if (test.blacklisted) {
         testCase = it.skip
-      } else if (test.whitelisted) {
+      }
+      if (test.whitelisted) {
         testCase = it.only
       }
 
@@ -159,6 +161,7 @@ function loadTests() {
         const stream = parser.import(input, {
           baseIRI: path.basename(test.input),
           metadata: test.metadata,
+          strictPropertyEscaping: true,
         })
 
         return Promise.all([

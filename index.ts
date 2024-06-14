@@ -15,6 +15,7 @@ export interface Options {
   skipLinesWithError?: boolean
   trimHeaders?: boolean
   skipEmptyLines?: boolean
+  strictPropertyEscaping?: boolean
 }
 
 export default class Parser {
@@ -26,8 +27,9 @@ export default class Parser {
   private readonly skipLinesWithError: boolean | undefined
   private readonly trimHeaders: boolean | undefined
   private readonly skipEmptyLines: boolean | undefined
+  private readonly strictPropertyEscaping: boolean | undefined
 
-  constructor({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError, trimHeaders, skipEmptyLines }: Options) {
+  constructor({ metadata, baseIRI = '', factory = rdf, timezone, relaxColumnCount, skipLinesWithError, trimHeaders, skipEmptyLines, strictPropertyEscaping }: Options) {
     this.metadata = metadata
     this.baseIRI = baseIRI
     this.factory = factory
@@ -36,6 +38,7 @@ export default class Parser {
     this.skipLinesWithError = skipLinesWithError
     this.trimHeaders = trimHeaders
     this.skipEmptyLines = skipEmptyLines
+    this.strictPropertyEscaping = strictPropertyEscaping
   }
 
   import(input: Readable, {
@@ -47,8 +50,14 @@ export default class Parser {
     skipLinesWithError = this.skipLinesWithError,
     trimHeaders = this.trimHeaders,
     skipEmptyLines = this.skipEmptyLines,
+    strictPropertyEscaping = this.strictPropertyEscaping,
   }: Partial<Options> = {}) {
-    const parsedMetadata = parseMetadata(metadata, { baseIRI, factory, timezone })
+    const parsedMetadata = parseMetadata(metadata, {
+      baseIRI,
+      factory,
+      timezone,
+      strictPropertyEscaping,
+    })
 
     const reader = new CsvParser({
       delimiter: parsedMetadata.delimiter,
@@ -60,7 +69,12 @@ export default class Parser {
       skipEmptyLines,
     })
 
-    const output = new ObjectParserTransform({ baseIRI, factory, metadata: parsedMetadata, timezone })
+    const output = new ObjectParserTransform({
+      baseIRI,
+      factory,
+      metadata: parsedMetadata,
+      timezone,
+    })
 
     input.on('end', () => {
       if (!output.readable) {

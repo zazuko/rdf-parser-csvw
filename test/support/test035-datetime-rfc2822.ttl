@@ -1,0 +1,43 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+
+<http://example.org/id/full> <http://vocab.example.org/date> "1995-12-25T09:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://example.org/id/no-day> <http://vocab.example.org/date> "1995-12-25T09:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://example.org/id/no-tz> <http://vocab.example.org/date> "1995-12-25T13:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://example.org/id/no-day-no-tz> <http://vocab.example.org/date> "1995-12-25T13:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+_:c14n3 a csvw:TableGroup ;
+  csvw:table
+    [
+      rdf:type csvw:Table ;
+      csvw:row
+        [
+          rdf:type csvw:Row ;
+          csvw:describes <http://example.org/id/full> ;
+          csvw:rownum 1 ;
+          csvw:url <test035-datetime-rfc2822.csv#row=2> ;
+        ],
+        [
+          rdf:type csvw:Row ;
+          csvw:describes <http://example.org/id/no-day> ;
+          csvw:rownum 2 ;
+          csvw:url <test035-datetime-rfc2822.csv#row=3> ;
+        ],
+        [
+          rdf:type csvw:Row ;
+          csvw:describes <http://example.org/id/no-tz> ;
+          csvw:rownum 3 ;
+          csvw:url <test035-datetime-rfc2822.csv#row=4> ;
+        ],
+        [
+          rdf:type csvw:Row ;
+          csvw:describes <http://example.org/id/no-day-no-tz> ;
+          csvw:rownum 4 ;
+          csvw:url <test035-datetime-rfc2822.csv#row=5> ;
+        ] ;
+      csvw:url <test035-datetime-rfc2822.csv> ;
+    ] .
+

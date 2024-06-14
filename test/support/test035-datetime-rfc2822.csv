@@ -1,0 +1,5 @@
+ID,Date
+full,"Mon, 25 Dec 1995 13:30:00 +0430"
+no-day,"25 Dec 1995 13:30:00 +0430"
+no-tz,"Mon, 25 Dec 1995 13:30:00 GMT"
+no-day-no-tz,"Mon, 25 Dec 1995 13:30:00 GMT"

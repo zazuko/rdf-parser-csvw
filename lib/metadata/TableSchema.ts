@@ -15,6 +15,7 @@ interface Options {
   factory: Factory
   timezone?: string
   root?: Term | GraphPointer
+  strictPropertyEscaping?: boolean
 }
 
 type Row = Record<string, string>
@@ -66,8 +67,9 @@ export default class TableSchema {
   private allColumns: ParsedColumn[] | null
   aboutUrl: (row: Row) => NamedNode | BlankNode
   propertyUrl?: URITemplate
+  private readonly strictPropertyEscaping: boolean | undefined
 
-  constructor(dataset: DatasetCore, { root, baseIRI, factory, timezone }: Options) {
+  constructor(dataset: DatasetCore, { root, baseIRI, factory, timezone, strictPropertyEscaping }: Options) {
     const graph = factory.clownface({ dataset })
 
     this.factory = factory
@@ -75,6 +77,7 @@ export default class TableSchema {
     this.root = root ? graph.node(root) : graph.has(this.ns.tableSchema).out(this.ns.tableSchema).toArray().shift()
     this.baseIRI = baseIRI
     this.timezone = timezone
+    this.strictPropertyEscaping = strictPropertyEscaping
 
     this.aboutUrl = () => {
       return this.factory.blankNode()
@@ -235,19 +238,21 @@ export default class TableSchema {
       return undefined
     }
 
-    if (this.ns.dateTime.equals(column.datatype.base) && column.datatype.format) {
-      const date = parseDateTime(value, column.datatype.format, this.timezone)
-      return this.factory.literal(date?.toISO() ?? value, this.ns.dateTime)
-    }
+    if (column.datatype.format) {
+      if (this.ns.dateTime.equals(column.datatype.base) || this.ns.dateTimeStamp.equals(column.datatype.base)) {
+        const date = parseDateTime(value, column.datatype.format, this.timezone)
+        return this.factory.literal(date?.toISO({ suppressMilliseconds: true }) ?? value, column.datatype.base)
+      }
 
-    if (this.ns.date.equals(column.datatype.base) && column.datatype.format) {
-      const date = parseDateTime(value, column.datatype.format, this.timezone)
-      return this.factory.literal(date ? date.toFormat('yyyy-MM-dd') : value, this.ns.date)
-    }
+      if (this.ns.date.equals(column.datatype.base)) {
+        const date = parseDateTime(value, column.datatype.format, this.timezone)
+        return this.factory.literal(date ? date.toISODate() : value, this.ns.date)
+      }
 
-    if (this.ns.time.equals(column.datatype.base) && column.datatype.format) {
-      const date = parseDateTime(value, column.datatype.format, this.timezone)
-      return this.factory.literal(date?.toISOTime({ suppressMilliseconds: true }) || value, this.ns.date)
+      if (this.ns.time.equals(column.datatype.base)) {
+        const date = parseDateTime(value, column.datatype.format, this.timezone)
+        return this.factory.literal(date?.toISOTime({ suppressMilliseconds: true }) || value, this.ns.date)
+      }
     }
 
     if (column.datatype.base) {
@@ -279,9 +284,15 @@ export default class TableSchema {
   }
 
   defaultPropertyUrl(name: string) {
+    let columnFragment = encodeURIComponent(name)
+
+    if (this.strictPropertyEscaping) {
+      columnFragment = columnFragment.replace(/-/g, '%2D')
+    }
+
     return {
       fill: () => {
-        return this.baseIRI + '#' + encodeURIComponent(name).replace(/-/g, '%2D')
+        return this.baseIRI + '#' + columnFragment
       },
     } as unknown as URITemplate
   }

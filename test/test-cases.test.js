@@ -21,6 +21,7 @@ const blackList = [
 
 function datasetFromN3Fs(filename) {
   filename = path.resolve(filename)
+  filename = fs.existsSync(filename + '.nt') ? filename + '.nt' : filename + '.ttl'
 
   try {
     fs.readFileSync(filename)
@@ -44,7 +45,7 @@ describe('test-cases', () => {
     const basePath = path.dirname(csvFile)
     const baseName = path.basename(csvFile, '.csv')
     const metadataFile = path.join(basePath, baseName + '.csv-metadata.json')
-    const outputFile = path.join(basePath, baseName + '.nt')
+    const outputFile = path.join(basePath, baseName)
     const id = baseName.slice(4, 7)
 
     if (blackList.indexOf(id) !== -1) {
