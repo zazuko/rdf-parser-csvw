@@ -251,7 +251,7 @@ export default class TableSchema {
 
       if (this.ns.time.equals(column.datatype.base)) {
         const date = parseDateTime(value, column.datatype.format, this.timezone)
-        return this.factory.literal(date?.toISOTime({ suppressMilliseconds: true }) || value, this.ns.date)
+        return this.factory.literal(date?.toISOTime({ suppressMilliseconds: true }) || value, this.ns.time)
       }
     }
 

@@ -36,7 +36,7 @@ const blackList = new Set([
   'manifest-rdf#test171',
   'manifest-rdf#test183',
   'manifest-rdf#test188', // date/time
-  'manifest-rdf#test189',
+  'manifest-rdf#test189', // time
   'manifest-rdf#test190', // date/time
   'manifest-rdf#test228',
   'manifest-rdf#test229',

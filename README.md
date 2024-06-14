@@ -39,4 +39,4 @@ The options from the constructor and the `.import` method will be merged togethe
 
 - Date/Time formats are generally supported with possible issues around the timezone specifier `X` and the exact formatting of the timezone offset.
 - [RFC2822 dates](https://datatracker.ietf.org/doc/html/rfc2822#page-14) are supported via explict 'RFC2822' datatype format (case insensitive).
-- Time formats are partially implemented but not officially supported.
+- Time formats are implemented but the output will always be normalised to UTC. 
