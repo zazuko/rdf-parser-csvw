@@ -35,6 +35,7 @@ const blackList = new Set([
   'manifest-rdf#test170',
   'manifest-rdf#test171',
   'manifest-rdf#test183',
+  // following date and time tests are duplicated and slightly adjusted in our tests
   'manifest-rdf#test188', // date/time
   'manifest-rdf#test189', // time
   'manifest-rdf#test190', // date/time
