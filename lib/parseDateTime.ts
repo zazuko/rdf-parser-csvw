@@ -16,14 +16,6 @@ export default function parseDateTime(original: string, format: string, zone: st
     }
 
     if (!zone) {
-      const offset = value
-        .replace(/.*([+-])(\d{2})(:?)(\d{2})?$/, '$1$2:$4')
-
-      if (offset !== value) {
-        zone = `UTC${offset}`
-      }
-    }
-    if (!zone) {
       zone = 'UTC'
     }
 
