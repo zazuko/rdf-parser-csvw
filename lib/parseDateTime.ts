@@ -31,13 +31,6 @@ export default function parseDateTime(original: string, format: string, zone: st
     if (!date.isValid) {
       date = DateTime.fromFormat(value, format.replace('ZZZ', 'Z'), { zone })
     }
-
-    if (!zone && !original.match(/(Z|[+-]\d{2}:?(\d{2})?)$/)) {
-      const offset = value
-        .replace(/.*([+-])(\d{2})(:?(\d{2})?)$/, '$1$2')
-
-      date = date.setZone(`UTC${offset}`)
-    }
   }
 
   if (!date.isValid) {

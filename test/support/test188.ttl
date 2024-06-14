@@ -24,9 +24,9 @@
           <test188.csv#dd-MM-yyyy> "2015-03-22"^^xsd:date;
           <test188.csv#dd%2FMM%2Fyyyy> "2015-03-22"^^xsd:date;
           <test188.csv#dd.MM.yyyy> "2015-03-22"^^xsd:date;
-          <test188.csv#dd.MM.yyyy%20XXX> "2015-03-22Z"^^xsd:date;
+          <test188.csv#dd.MM.yyyy%20XXX> "2015-03-22"^^xsd:date;
           <test188.csv#yyyy-MM-dd> "2015-03-22"^^xsd:date;
-          <test188.csv#yyyy-MM-ddX> "2015-03-22Z"^^xsd:date;
+          <test188.csv#yyyy-MM-ddX> "2015-03-22"^^xsd:date;
           <test188.csv#yyyyMMdd> "2015-03-22"^^xsd:date
         ];
         csvw:rownum 1;
