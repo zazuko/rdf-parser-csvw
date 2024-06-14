@@ -239,20 +239,23 @@ export default class TableSchema {
     }
 
     if (column.datatype.format) {
-      if (this.ns.dateTime.equals(column.datatype.base) || this.ns.dateTimeStamp.equals(column.datatype.base)) {
-        const date = parseDateTime(value, column.datatype.format, this.timezone)
-        return this.factory.literal(date?.toISO({ suppressMilliseconds: true }) ?? value, column.datatype.base)
+      let literal:string | undefined
+
+      const date = parseDateTime(value, column.datatype.format, this.timezone)
+      switch (column.datatype.base.value) {
+        case this.ns.dateTimeStamp.value:
+        case this.ns.dateTime.value:
+          literal = date?.toISO({ suppressMilliseconds: true })
+          break
+        case this.ns.date.value:
+          literal = date?.toISODate()
+          break
+        case this.ns.time.value:
+          literal = date?.toISOTime({ suppressMilliseconds: true })
+          break
       }
 
-      if (this.ns.date.equals(column.datatype.base)) {
-        const date = parseDateTime(value, column.datatype.format, this.timezone)
-        return this.factory.literal(date ? date.toISODate() : value, this.ns.date)
-      }
-
-      if (this.ns.time.equals(column.datatype.base)) {
-        const date = parseDateTime(value, column.datatype.format, this.timezone)
-        return this.factory.literal(date?.toISOTime({ suppressMilliseconds: true }) || value, this.ns.time)
-      }
+      return this.factory.literal(literal || value, column.datatype.base)
     }
 
     if (column.datatype.base) {
