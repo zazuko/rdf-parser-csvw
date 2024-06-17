@@ -1,5 +1,14 @@
 # @zazuko/rdf-parser-csvw
 
+## 0.17.0
+
+### Minor Changes
+
+- 815e65d: This version attempts to improve the support for date/time formats
+- fc3547d: Require the RDF/JS factory to be an environment with `clownface`
+- 815e65d: When producing `xsd:dateTime(Offset)` literals, will remove the milliseconds
+- 815e65d: Dates in the RFC2822 format are no longer implicitly supported. Use custom datatype `format = 'RFC2822'` to interpret cell values as timestamps in that format
+
 ## 0.16.5
 
 ### Patch Changes
