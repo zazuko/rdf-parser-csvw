@@ -15,6 +15,7 @@ interface Options {
   factory: Factory
   timezone?: string
   root?: Term | GraphPointer
+  strictPropertyEscaping?: boolean
 }
 
 type Row = Record<string, string>
@@ -44,6 +45,18 @@ interface Column {
   value: Quad_Object
 }
 
+const xsd = 'http://www.w3.org/2001/XMLSchema#'
+const rdfs = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+const builtInTypes = new Map<string | undefined, string>([
+  ['number', `${xsd}double`],
+  ['binary', `${xsd}base64Binary`],
+  ['datetime', `${xsd}dateTime`],
+  ['any', `${xsd}anyAtomicType`],
+  ['xml', `${rdfs}XMLLiteral`],
+  ['html', `${rdfs}HTML`],
+  ['json', 'http://www.w3.org/ns/csvw#JSON'],
+])
+
 export default class TableSchema {
   private readonly factory: Factory
   private readonly ns: NS
@@ -54,8 +67,9 @@ export default class TableSchema {
   private allColumns: ParsedColumn[] | null
   aboutUrl: (row: Row) => NamedNode | BlankNode
   propertyUrl?: URITemplate
+  private readonly strictPropertyEscaping: boolean | undefined
 
-  constructor(dataset: DatasetCore, { root, baseIRI, factory, timezone }: Options) {
+  constructor(dataset: DatasetCore, { root, baseIRI, factory, timezone, strictPropertyEscaping }: Options) {
     const graph = factory.clownface({ dataset })
 
     this.factory = factory
@@ -63,6 +77,7 @@ export default class TableSchema {
     this.root = root ? graph.node(root) : graph.has(this.ns.tableSchema).out(this.ns.tableSchema).toArray().shift()
     this.baseIRI = baseIRI
     this.timezone = timezone
+    this.strictPropertyEscaping = strictPropertyEscaping
 
     this.aboutUrl = () => {
       return this.factory.blankNode()
@@ -153,11 +168,16 @@ export default class TableSchema {
       return { base: datatype.term }
     }
 
-    const base = datatype.out(this.ns.base).value
+    const baseString = datatype.out(this.ns.base).value
     const format = datatype.out(this.ns.format).value
 
+    let base = builtInTypes.get(baseString)
+    if (!base) {
+      base = xsd + (baseString || 'string')
+    }
+
     return {
-      base: this.factory.namedNode('http://www.w3.org/2001/XMLSchema#' + (base || 'string')),
+      base: this.factory.namedNode(base),
       format,
     }
   }
@@ -218,14 +238,24 @@ export default class TableSchema {
       return undefined
     }
 
-    if (this.ns.dateTime.equals(column.datatype.base)) {
-      const date = parseDateTime(value, column.datatype.format, this.timezone)
-      return this.factory.literal(date ? date.toISO()! : value, this.ns.dateTime)
-    }
+    if (column.datatype.format) {
+      let literal:string | undefined
 
-    if (this.ns.date.equals(column.datatype.base)) {
       const date = parseDateTime(value, column.datatype.format, this.timezone)
-      return this.factory.literal(date ? date.toFormat('yyyy-MM-dd') : value, this.ns.date)
+      switch (column.datatype.base.value) {
+        case this.ns.dateTimeStamp.value:
+        case this.ns.dateTime.value:
+          literal = date?.toISO({ suppressMilliseconds: true })
+          break
+        case this.ns.date.value:
+          literal = date?.toISODate()
+          break
+        case this.ns.time.value:
+          literal = date?.toISOTime({ suppressMilliseconds: true })
+          break
+      }
+
+      return this.factory.literal(literal || value, column.datatype.base)
     }
 
     if (column.datatype.base) {
@@ -257,9 +287,15 @@ export default class TableSchema {
   }
 
   defaultPropertyUrl(name: string) {
+    let columnFragment = encodeURIComponent(name)
+
+    if (this.strictPropertyEscaping) {
+      columnFragment = columnFragment.replace(/-/g, '%2D')
+    }
+
     return {
       fill: () => {
-        return this.baseIRI + '#' + encodeURI(name)
+        return this.baseIRI + '#' + columnFragment
       },
     } as unknown as URITemplate
   }

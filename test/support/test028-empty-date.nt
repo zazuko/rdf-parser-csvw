@@ -1,4 +1,4 @@
-<http://example.org/id/234345> <http://vocab.example.org/date> "2021-01-02T10:11:12.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://example.org/id/234345> <http://vocab.example.org/date> "2021-01-02T10:11:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 <http://example.org/id/234345> <http://vocab.example.org/id> "234345" .
 <http://example.org/id/234665> <http://vocab.example.org/id> "234665" .
 <http://example.org/id/343555> <http://vocab.example.org/id> "343555" .

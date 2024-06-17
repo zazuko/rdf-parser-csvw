@@ -1,0 +1,21 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "test035-datetime-rfc2822.csv",
+  "tableSchema": {
+    "aboutUrl": "http://example.org/id/{ID}",
+    "columns": [
+      {
+        "titles": "ID",
+        "suppressOutput": true
+      },
+      {
+        "titles": "Date",
+        "propertyUrl": "http://vocab.example.org/date",
+        "datatype": {
+          "base": "dateTime",
+          "format": "RFC2822"
+        }
+      }
+    ]
+  }
+}

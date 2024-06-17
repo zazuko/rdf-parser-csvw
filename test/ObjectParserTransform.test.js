@@ -2,6 +2,7 @@ import assert from 'assert'
 import fromStream from 'rdf-dataset-ext/fromStream.js'
 import toCanonical from 'rdf-dataset-ext/toCanonical.js'
 import { PassThrough } from 'readable-stream'
+import { expect } from 'chai'
 import ObjectParserTransform from '../lib/ObjectParserTransform.js'
 import rdf from './support/factory.js'
 import waitFor from './support/waitFor.js'
@@ -101,7 +102,7 @@ describe('ObjectParserTransform', () => {
     })
   })
 
-  it('should output date/time at face value if parsing fails', async () => {
+  it('should output date/time at face value', async () => {
     const input = new PassThrough({ objectMode: true })
     const metadata = rdf.clownface()
       .blankNode()
@@ -134,5 +135,41 @@ describe('ObjectParserTransform', () => {
     const dataset = await fromStream(rdf.dataset(), parser)
     const [{ object }] = dataset.match(null, rdf.namedNode('#key1'))
     assert(object.equals(rdf.literal('not a date', rdf.ns.xsd.dateTime)))
+  })
+
+  it('should try to parse date/time when given format', async () => {
+    const input = new PassThrough({ objectMode: true })
+    const metadata = rdf.clownface()
+      .blankNode()
+      .addOut(rdf.ns.csvw.tableSchema, (table) => {
+        const column = table.blankNode()
+        column
+          .addOut(rdf.ns.csvw.title, 'key1')
+          .addOut(rdf.ns.csvw.datatype, dt => {
+            dt.addOut(rdf.ns.csvw.base, 'date')
+            dt.addOut(rdf.ns.csvw.format, 'yyyy')
+          })
+        table.addList(rdf.ns.csvw.column, [column])
+      })
+    const parser = new ObjectParserTransform({
+      metadata: metadata.dataset,
+      factory: rdf,
+    })
+
+    input.pipe(parser)
+
+    input.write({
+      line: 2,
+      row: {
+        key0: 'value0',
+        key1: '2000',
+      },
+    })
+
+    input.end()
+
+    const dataset = await fromStream(rdf.dataset(), parser)
+    const [{ object }] = dataset.match(null, rdf.namedNode('#key1'))
+    expect(object).to.deep.equals(rdf.literal('2000-01-01', rdf.ns.xsd.date))
   })
 })

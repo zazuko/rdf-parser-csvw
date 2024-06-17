@@ -7,6 +7,7 @@ interface Options {
   baseIRI: string
   factory: Factory
   timezone?: string
+  strictPropertyEscaping?: boolean
 }
 
 export default class Metadata {
@@ -17,14 +18,16 @@ export default class Metadata {
   delimiter: string
   quoteChar: string | null
   lineTerminators: string[] | null
+  strictPropertyEscaping: boolean
   ns: NS
   tableSchemas: TableSchema[] = []
 
-  constructor(dataset: DatasetCore, { baseIRI, factory, timezone }: Options) {
+  constructor(dataset: DatasetCore, { baseIRI, factory, timezone, strictPropertyEscaping = false }: Options) {
     this.factory = factory
     this.dataset = dataset
     this.baseIRI = baseIRI
     this.timezone = timezone
+    this.strictPropertyEscaping = strictPropertyEscaping
     this.delimiter = ','
     this.quoteChar = '"'
     this.lineTerminators = null
@@ -41,6 +44,7 @@ export default class Metadata {
       baseIRI: this.baseIRI,
       factory: this.factory,
       timezone: this.timezone,
+      strictPropertyEscaping: this.strictPropertyEscaping,
     })]
   }
 
