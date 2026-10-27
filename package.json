@@ -51,7 +51,7 @@
     "clownface": "^2.0.2",
     "commander": "^15.0.0",
     "csv-parse": "^5.5.6",
-    "lodash": "^4.17.15",
+    "lodash": "^4.18.1",
     "luxon": "^1.17.3",
     "readable-stream": "^4.5.2",
     "uri-templates": "^0.2.0"
