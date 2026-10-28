@@ -1,22 +1,22 @@
-import assert from 'assert'
+import assert from 'node:assert'
+import { PassThrough } from 'node:stream'
 import { getStreamAsArray } from 'get-stream'
-import { PassThrough } from 'readable-stream'
 import CsvParser from '../lib/CsvParser.js'
 import waitFor from './support/waitFor.js'
 
-describe('csvParser', () => {
-  it('should be a function', () => {
+describe('csvParser', function () {
+  it('should be a function', function () {
     assert.strictEqual(typeof CsvParser, 'function')
   })
 
-  it('should return a Transform', () => {
+  it('should return a Transform', function () {
     const parser = new CsvParser()
 
     assert.strictEqual(parser.readable, true)
     assert.strictEqual(parser.writable, true)
   })
 
-  it('should parse CSV with header', () => {
+  it('should parse CSV with header', function () {
     const input = new PassThrough()
     const parser = new CsvParser()
 
@@ -31,13 +31,13 @@ describe('csvParser', () => {
     return waitFor(parser)
   })
 
-  it('should parse CSV with BOM', async () => {
+  it('should parse CSV with BOM', async function () {
     const input = new PassThrough()
     const parser = new CsvParser()
 
     input.pipe(parser)
 
-    const output = []
+    const output: string[] = []
     const expected = [{
       line: 2,
       row: {
@@ -55,17 +55,16 @@ describe('csvParser', () => {
     input.end()
 
     await waitFor(parser)
-
     assert.deepStrictEqual(output, expected)
   })
 
-  it('should output objects with line number and row data', () => {
+  it('should output objects with line number and row data', async function () {
     const input = new PassThrough()
     const parser = new CsvParser()
 
     input.pipe(parser)
 
-    const output = []
+    const output: string[] = []
     const expected = [{
       line: 2,
       row: {
@@ -82,18 +81,17 @@ describe('csvParser', () => {
     input.write('value0,value1\n')
     input.end()
 
-    return waitFor(parser).then(() => {
-      assert.deepStrictEqual(output, expected)
-    })
+    await waitFor(parser)
+    assert.deepStrictEqual(output, expected)
   })
 
-  it('should parse lines with alternative delimiter', () => {
+  it('should parse lines with alternative delimiter', async function () {
     const input = new PassThrough()
     const parser = new CsvParser({ delimiter: ';' })
 
     input.pipe(parser)
 
-    const output = []
+    const output: string[] = []
     const expected = [{
       line: 2,
       row: {
@@ -110,18 +108,17 @@ describe('csvParser', () => {
     input.write('value0;value1\n')
     input.end()
 
-    return waitFor(parser).then(() => {
-      assert.deepStrictEqual(output, expected)
-    })
+    await waitFor(parser)
+    assert.deepStrictEqual(output, expected)
   })
 
-  it('should parse lines with alternative lineTerminator and UTF16LE encoding', () => {
+  it('should parse lines with alternative lineTerminator and UTF16LE encoding', async function () {
     const input = new PassThrough()
     const parser = new CsvParser({ lineTerminators: ['\r\n'] })
 
     input.pipe(parser)
 
-    const output = []
+    const output: string[] = []
     const expected = [{
       line: 2,
       row: {
@@ -139,18 +136,17 @@ describe('csvParser', () => {
     input.write('value0,value1\r\n', 'utf16le')
     input.end()
 
-    return waitFor(parser).then(() => {
-      assert.deepStrictEqual(output, expected)
-    })
+    await waitFor(parser)
+    assert.deepStrictEqual(output, expected)
   })
 
-  it('should allow trimming of whitespace in headers', () => {
+  it('should allow trimming of whitespace in headers', async function () {
     const input = new PassThrough()
     const parser = new CsvParser({ lineTerminators: ['\r\n'], trimHeaders: true })
 
     input.pipe(parser)
 
-    const output = []
+    const output: string[] = []
     const expected = [{
       line: 2,
       row: {
@@ -168,12 +164,11 @@ describe('csvParser', () => {
     input.write('value0,value1,value2\r\n')
     input.end()
 
-    return waitFor(parser).then(() => {
-      assert.deepStrictEqual(output, expected)
-    })
+    await waitFor(parser)
+    assert.deepStrictEqual(output, expected)
   })
 
-  it('should handle errors', async () => {
+  it('should handle errors', async function () {
     const input = new PassThrough()
     const parser = new CsvParser({ delimiter: ';' })
 

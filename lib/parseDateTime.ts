@@ -6,7 +6,8 @@ export default function parseDateTime(original: string, format: string, zone: st
 
   if (format.toLowerCase() === 'rfc2822') {
     date = DateTime.fromRFC2822(value, { zone })
-  } else {
+  }
+  else {
     const timezoneMarkerMatched = /(?<format>[^Xx]+)(?: ?(?<timezoneMarker>(X{1,3}|x{1,3})))$/.exec(format)
     if (timezoneMarkerMatched?.groups) {
       if (timezoneMarkerMatched.groups.timezoneMarker) {

@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 
 export default class MetadataBuilder {
   static readFirstLine(filename: string): Promise<string> {
@@ -39,17 +39,17 @@ export default class MetadataBuilder {
   }
 
   static extractHeaders(line: string, delimiter: string) {
-    return line.split(delimiter).map(header => {
+    return line.split(delimiter).map((header) => {
       return header.split('"').join('').trim()
     })
   }
 
-  static build(baseIri: string | undefined, headers: string[], { aboutUrl, delimiter = ',', propertyBaseIri = baseIri }: { aboutUrl?: string; delimiter?: string; propertyBaseIri?: string} = {}) {
+  static build(baseIri: string | undefined, headers: string[], { aboutUrl, delimiter = ',', propertyBaseIri = baseIri }: { aboutUrl?: string, delimiter?: string, propertyBaseIri?: string } = {}) {
     const metadata: {
-      dialect?: {
+      'dialect'?: {
         delimiter: string
       }
-      tableSchema?: {
+      'tableSchema'?: {
         aboutUrl: string
         columns: {
           titles: string
@@ -67,7 +67,7 @@ export default class MetadataBuilder {
 
     aboutUrl = aboutUrl || `${baseIri}{${encodeURIComponent(headers[0])}}`
 
-    const columns = headers.map(header => {
+    const columns = headers.map((header) => {
       return {
         titles: header,
         propertyUrl: `${propertyBaseIri}${encodeURIComponent(header)}`,
@@ -82,15 +82,15 @@ export default class MetadataBuilder {
     return metadata
   }
 
-  static fromHeaderLine(firstLine: string, { aboutUrl, baseIri, delimiter, headers, propertyBaseIri }: { aboutUrl?: string; baseIri?: string; delimiter?: string; headers?: string[]; propertyBaseIri?: string } = {}) {
+  static fromHeaderLine(firstLine: string, { aboutUrl, baseIri, delimiter, headers, propertyBaseIri }: { aboutUrl?: string, baseIri?: string, delimiter?: string, headers?: string[], propertyBaseIri?: string } = {}) {
     delimiter = delimiter || MetadataBuilder.detectDelimiter(firstLine)
     headers = headers || MetadataBuilder.extractHeaders(firstLine, delimiter)
 
     return MetadataBuilder.build(baseIri, headers, { aboutUrl, delimiter, propertyBaseIri })
   }
 
-  static fromFile(filename: string, { aboutUrl, baseIri = `file:///${filename}/`, delimiter, headers, propertyBaseIri }: { aboutUrl?: string; baseIri?: string; delimiter?: string; headers?: string[]; propertyBaseIri?: string } = {}) {
-    return MetadataBuilder.readFirstLine(filename).then(firstLine => {
+  static fromFile(filename: string, { aboutUrl, baseIri = `file:///${filename}/`, delimiter, headers, propertyBaseIri }: { aboutUrl?: string, baseIri?: string, delimiter?: string, headers?: string[], propertyBaseIri?: string } = {}) {
+    return MetadataBuilder.readFirstLine(filename).then((firstLine) => {
       return MetadataBuilder.fromHeaderLine(firstLine, { aboutUrl, baseIri, delimiter, headers, propertyBaseIri })
     })
   }

@@ -1,6 +1,6 @@
 import type { DatasetCore } from '@rdfjs/types'
 import rdf from '@rdfjs/dataset'
-import { Factory } from '../Factory.js'
+import type { Factory } from '../Factory.js'
 import Metadata from './Metadata.js'
 
 interface Options {

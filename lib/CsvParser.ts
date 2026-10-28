@@ -1,5 +1,5 @@
+import { Transform } from 'node:stream'
 import { Parser } from 'csv-parse'
-import { Transform } from 'readable-stream'
 
 interface Options {
   delimiter?: string
@@ -35,11 +35,11 @@ export default class CsvParser extends Transform {
       skip_empty_lines: skipEmptyLines,
     })
 
-    this.parser.on('error', err => {
+    this.parser.on('error', (err) => {
       this.destroy(err)
     })
 
-    this.parser.push = data => {
+    this.parser.push = (data) => {
       if (data) {
         this.push({
           line: data.info.lines,

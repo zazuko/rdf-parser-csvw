@@ -1,12 +1,12 @@
-import assert from 'assert'
-import fs from 'fs'
-import path from 'path'
+import assert from 'node:assert'
+import fs from 'node:fs'
+import path from 'node:path'
 import fromStream from 'rdf-dataset-ext/fromStream.js'
 import toCanonical from 'rdf-dataset-ext/toCanonical.js'
 import JsonLdParser from '@rdfjs/parser-jsonld'
 import N3Parser from '@rdfjs/parser-n3'
+import rdf from '@zazuko/env'
 import CsvwParser from '../index.js'
-import rdf from './support/factory.js'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
@@ -58,97 +58,90 @@ const blackList = new Set([
   'manifest-rdf#test307',
 ])
 
-const whiteList = new Set([
+const whiteList = new Set<string>([
 ])
 
-function datasetFromN3Fs(filename) {
-  const parser = new N3Parser({ baseIRI: new String('') }) // eslint-disable-line no-new-wrappers
+function datasetFromN3Fs(filename: string) {
+  const parser = new N3Parser({ baseIRI: '' })
 
   return fromStream(rdf.dataset(), parser.import(fs.createReadStream(filename), { factory: rdf }))
 }
 
-function datasetFromJsonLdFs(filename) {
+function datasetFromJsonLdFs(filename: string) {
   const parser = new JsonLdParser()
 
   return fromStream(rdf.dataset(), parser.import(fs.createReadStream(filename), { factory: rdf }))
 }
 
-function loadTests() {
+async function loadTests() {
   const manifestFile = 'test/spec/tests/manifest-rdf.ttl'
 
   try {
     fs.readFileSync(manifestFile)
-  } catch (err) {
+  }
+  catch {
     return Promise.resolve([])
   }
 
-  return datasetFromN3Fs(manifestFile).then((manifest) => {
-    const tests = [...manifest.match(
-      null,
-      rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-      rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#ToRdfTest'),
-    )].map((test) => {
-      return test.subject
-    }).map((test) => {
-      const name = [...manifest.match(test, rdf.namedNode('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#name'))]
-        .map((t) => {
-          return t.object.value
-        })[0]
+  const manifest = await datasetFromN3Fs(manifestFile)
+  const tests = [...manifest.match(
+    null,
+    rdf.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+    rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#ToRdfTest'))].map((test) => {
+    return test.subject
+  }).map(async (testId) => {
+    const name = [...manifest.match(testId, rdf.namedNode('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#name'))]
+      .map((t) => {
+        return t.object.value
+      })[0]
 
-      const action = [...manifest.match(test, rdf.namedNode('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#action'))]
-        .map((t) => {
-          return t.object.value
-        })[0]
+    const action = [...manifest.match(testId, rdf.namedNode('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#action'))]
+      .map((t_1) => {
+        return t_1.object.value
+      })[0]
 
-      const result = [...manifest.match(test, rdf.namedNode('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#result'))]
-        .map((t) => {
-          return t.object.value
-        })[0]
+    const result = [...manifest.match(testId, rdf.namedNode('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#result'))]
+      .map((t_2) => {
+        return t_2.object.value
+      })[0]
 
-      const implicit = [...manifest.match(test, rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#implicit'))]
-        .map((t) => {
-          return t.object.value
-        })[0]
+    const implicit = [...manifest.match(testId, rdf.namedNode('http://www.w3.org/2013/csvw/tests/vocab#implicit'))]
+      .map((t_3) => {
+        return t_3.object.value
+      })[0]
 
-      const label = name + '<' + test.value + '>'
+    const label = name + '<' + testId.value + '>'
 
-      const input = path.extname(action) === '.csv' ? action : implicit
-      const metadata = input === action ? implicit : action
+    const input = path.extname(action) === '.csv' ? action : implicit
+    const metadataPath = input === action ? implicit : action
 
-      return {
-        iri: test.value,
-        label,
-        name,
-        input,
-        metadata,
-        result,
-        blacklisted: blackList.has(test.value),
-        whitelisted: whiteList.has(test.value),
-      }
-    })
+    const metadata
+      = metadataPath && path.extname(metadataPath) === '.json'
+        ? await datasetFromJsonLdFs(path.join(__dirname, 'spec/tests', metadataPath))
+        : undefined
 
-    return Promise.all(tests.map((test) => {
-      if (test.metadata) {
-        if (path.extname(test.metadata) === '.json') {
-          return datasetFromJsonLdFs(path.join(__dirname, 'spec/tests', test.metadata)).then((metadata) => {
-            test.metadata = metadata
-
-            return test
-          })
-        }
-      }
-
-      return test
-    }))
+    return {
+      iri: testId.value,
+      label,
+      name,
+      input,
+      metadataPath,
+      metadata,
+      result,
+      blacklisted: blackList.has(testId.value),
+      whitelisted: whiteList.has(testId.value),
+    }
   })
+
+  return Promise.all(tests)
 }
 
 (async () => {
   const tests = await loadTests()
 
-  describe('W3C spec tests', () => {
+  describe('W3C spec tests', function () {
     for (const test of tests) {
-      let testCase = it
+      let testCase: Mocha.TestFunction | Mocha.PendingSuiteFunction | Mocha.ExclusiveTestFunction = it
       if (test.blacklisted) {
         testCase = it.skip
       }
@@ -156,8 +149,11 @@ function loadTests() {
         testCase = it.only
       }
 
-      testCase(test.label, () => {
-        const parser = new CsvwParser({ factory: rdf })
+      testCase(test.label, async function () {
+        const parser = new CsvwParser({
+          factory: rdf,
+          metadata: rdf.dataset(),
+        })
         const input = fs.createReadStream('test/spec/tests/' + test.input)
         const stream = parser.import(input, {
           baseIRI: path.basename(test.input),
@@ -165,15 +161,12 @@ function loadTests() {
           strictPropertyEscaping: true,
         })
 
-        return Promise.all([
+        const [expected, actual] = await Promise.all([
           datasetFromN3Fs('test/spec/tests/' + test.result),
           fromStream(rdf.dataset(), stream),
-        ]).then((results) => {
-          const expected = results[0]
-          const actual = results[1]
+        ])
 
-          assert.strictEqual(toCanonical(actual), toCanonical(expected))
-        })
+        assert.strictEqual(toCanonical(actual), toCanonical(expected))
       })
     }
   })
