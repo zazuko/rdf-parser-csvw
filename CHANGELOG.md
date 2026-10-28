@@ -1,5 +1,16 @@
 # @zazuko/rdf-parser-csvw
 
+## 0.17.1
+
+### Patch Changes
+
+- ba98b50: Updated commander to v15
+- d37f8d1: Removed deprecated usage of `url.resolve` and replaced with `relative-to-absolute-iri`
+- d37f8d1: Removed dependency on `readable-stream`
+- 7ae139a: Updated lodash to version 4.18.1
+- 3c38d22: Update glob to v12
+- 3c38d22: Update csv-parse to v7.0.2
+
 ## 0.17.0
 
 ### Minor Changes
