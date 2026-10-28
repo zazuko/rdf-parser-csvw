@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "lint": "eslint . --ignore-path .gitignore --quiet",
-    "test": "mocha --ignore test/spec.test.js",
-    "test:w3c": "mocha test/spec.test.js --delay",
+    "lint": "eslint . --quiet",
+    "test": "mocha test/*.test.ts --ignore test/spec.test.ts",
+    "test:w3c": "mocha test/spec.test.ts --delay",
     "release": "changeset publish",
     "prepack": "tsc"
   },
@@ -53,7 +53,7 @@
     "csv-parse": "^7.0.2",
     "lodash": "^4.18.1",
     "luxon": "^1.17.3",
-    "readable-stream": "^4.5.2",
+    "relative-to-absolute-iri": "^1.0.8",
     "uri-templates": "^0.2.0"
   },
   "devDependencies": {
@@ -61,26 +61,29 @@
     "@rdfjs/parser-jsonld": "^2.1.1",
     "@rdfjs/parser-n3": "^2.0.2",
     "@rdfjs/types": "^2.0.1",
-    "@tpluscode/eslint-config": "^0.4.5",
+    "@tpluscode/eslint-config": "^4",
     "@types/chai": "^5.2.3",
     "@types/lodash": "^4.17.4",
     "@types/luxon": "^3.4.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22",
     "@types/rdfjs__data-model": "^2.0.8",
     "@types/rdfjs__dataset": "^2.0.7",
-    "@typescript-eslint/eslint-plugin": "^7.11.0",
-    "@typescript-eslint/parser": "^7.11.0",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
     "@zazuko/env": "^3",
-    "eslint-import-resolver-typescript": "^3.6.1",
     "c8": "^12.0.0",
     "chai": "^6.3.0",
+    "eslint": "^10",
+    "eslint-import-resolver-typescript": "^4",
     "get-stream": "^9.0.1",
     "glob": "^12.0.0",
     "mocha": "^12",
     "rdf-dataset-ext": "^1.1.0",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.23.15",
     "typescript": "^5.4.5"
   },
   "mocha": {
-    "loader": "ts-node/esm"
+    "require": "tsx"
   }
 }

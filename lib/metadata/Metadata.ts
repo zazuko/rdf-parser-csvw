@@ -1,6 +1,7 @@
 import type { DatasetCore } from '@rdfjs/types'
-import namespace, { NS } from '../namespace.js'
-import { Factory } from '../Factory.js'
+import type { NS } from '../namespace.js'
+import namespace from '../namespace.js'
+import type { Factory } from '../Factory.js'
 import TableSchema from './TableSchema.js'
 
 interface Options {
@@ -76,7 +77,8 @@ export default class Metadata {
     if (quoteCharQuad) {
       if (quoteCharQuad.object.termType === 'Literal' && quoteCharQuad.object.datatype.equals(this.ns.boolean) && quoteCharQuad.object.value === 'false') {
         this.quoteChar = null
-      } else {
+      }
+      else {
         this.quoteChar = quoteCharQuad.object.value
       }
     }

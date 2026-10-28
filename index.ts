@@ -1,10 +1,11 @@
-import type { Readable } from 'stream'
+import type { Readable } from 'node:stream'
 import type { DatasetCore } from '@rdfjs/types'
 import CsvParser from './lib/CsvParser.js'
 import parseMetadata from './lib/metadata/index.js'
 import ObjectParserTransform from './lib/ObjectParserTransform.js'
-import Metadata from './lib/metadata/Metadata.js'
-import rdf, { Factory } from './lib/Factory.js'
+import type Metadata from './lib/metadata/Metadata.js'
+import type { Factory } from './lib/Factory.js'
+import rdf from './lib/Factory.js'
 
 export interface Options {
   baseIRI?: string
@@ -82,7 +83,7 @@ export default class Parser {
       }
     })
 
-    reader.on('error', err => {
+    reader.on('error', (err) => {
       output.destroy(err)
     })
 

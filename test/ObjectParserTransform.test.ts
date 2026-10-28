@@ -1,10 +1,9 @@
-import assert from 'assert'
-import fromStream from 'rdf-dataset-ext/fromStream.js'
-import toCanonical from 'rdf-dataset-ext/toCanonical.js'
-import { PassThrough } from 'readable-stream'
+import assert from 'node:assert'
+import { PassThrough } from 'node:stream'
 import { expect } from 'chai'
+import rdf from '@zazuko/env'
+import fromStream from 'rdf-dataset-ext/fromStream.js'
 import ObjectParserTransform from '../lib/ObjectParserTransform.js'
-import rdf from './support/factory.js'
 import waitFor from './support/waitFor.js'
 
 const ns = {
@@ -26,19 +25,19 @@ const ns = {
   },
 }
 
-describe('ObjectParserTransform', () => {
-  it('should be a constructor', () => {
+describe('ObjectParserTransform', function () {
+  it('should be a constructor', function () {
     assert.strictEqual(typeof ObjectParserTransform, 'function')
   })
 
-  it('should have a Transform interface', () => {
+  it('should have a Transform interface', function () {
     const parser = new ObjectParserTransform()
 
     assert.strictEqual(parser.readable, true)
     assert.strictEqual(parser.writable, true)
   })
 
-  it('should parse object', () => {
+  it('should parse object', function () {
     const input = new PassThrough({ objectMode: true })
     const parser = new ObjectParserTransform()
 
@@ -59,7 +58,7 @@ describe('ObjectParserTransform', () => {
     return waitFor(parser)
   })
 
-  it('should output RDF objects', () => {
+  it('should output RDF objects', async function () {
     const input = new PassThrough({ objectMode: true })
     const parser = new ObjectParserTransform({ factory: rdf })
 
@@ -97,12 +96,12 @@ describe('ObjectParserTransform', () => {
 
     input.end()
 
-    return fromStream(rdf.dataset(), parser).then((actual) => {
-      assert.strictEqual(toCanonical(actual), toCanonical(expected))
-    })
+    const actual = await rdf.dataset.fromStream(parser)
+
+    assert.strictEqual(rdf.dataset.toCanonical(actual), rdf.dataset.toCanonical(expected))
   })
 
-  it('should output date/time at face value', async () => {
+  it('should output date/time at face value', async function () {
     const input = new PassThrough({ objectMode: true })
     const metadata = rdf.clownface()
       .blankNode()
@@ -110,7 +109,7 @@ describe('ObjectParserTransform', () => {
         const column = table.blankNode()
         column
           .addOut(rdf.ns.csvw.title, 'key1')
-          .addOut(rdf.ns.csvw.datatype, dt => {
+          .addOut(rdf.ns.csvw.datatype, (dt) => {
             dt.addOut(rdf.ns.csvw.base, 'dateTime')
           })
         table.addList(rdf.ns.csvw.column, [column])
@@ -137,7 +136,7 @@ describe('ObjectParserTransform', () => {
     assert(object.equals(rdf.literal('not a date', rdf.ns.xsd.dateTime)))
   })
 
-  it('should try to parse date/time when given format', async () => {
+  it('should try to parse date/time when given format', async function () {
     const input = new PassThrough({ objectMode: true })
     const metadata = rdf.clownface()
       .blankNode()
@@ -145,7 +144,7 @@ describe('ObjectParserTransform', () => {
         const column = table.blankNode()
         column
           .addOut(rdf.ns.csvw.title, 'key1')
-          .addOut(rdf.ns.csvw.datatype, dt => {
+          .addOut(rdf.ns.csvw.datatype, (dt) => {
             dt.addOut(rdf.ns.csvw.base, 'date')
             dt.addOut(rdf.ns.csvw.format, 'yyyy')
           })

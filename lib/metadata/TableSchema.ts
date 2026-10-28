@@ -1,12 +1,13 @@
-/* eslint-disable camelcase */
-import URL from 'url'
+import { resolve } from 'relative-to-absolute-iri'
 import difference from 'lodash/difference.js'
-import uriTemplate, { URITemplate } from 'uri-templates'
+import type { URITemplate } from 'uri-templates'
+import uriTemplate from 'uri-templates'
 import type { BlankNode, DatasetCore, NamedNode, Quad_Object, Term } from '@rdfjs/types'
 import type { GraphPointer } from 'clownface'
-import namespace, { NS } from '../namespace.js'
+import type { NS } from '../namespace.js'
+import namespace from '../namespace.js'
 import parseDateTime from '../parseDateTime.js'
-import { Factory } from '../Factory.js'
+import type { Factory } from '../Factory.js'
 
 const defaultColumnNames = new Set(['_column', '_sourceColumn', '_row', '_sourceRow', '_name'])
 
@@ -93,6 +94,10 @@ export default class TableSchema {
     }
   }
 
+  private applyBaseIRI(arg: string) {
+    return resolve(arg, this.baseIRI)
+  }
+
   parseAboutUrl() {
     const aboutUrl = this.root?.out(this.ns.aboutUrl).value
 
@@ -103,7 +108,7 @@ export default class TableSchema {
     const aboutUrlTemplate = uriTemplate(aboutUrl)
 
     return (row: Row) => {
-      return this.factory.namedNode(URL.resolve(this.baseIRI, aboutUrlTemplate.fill(row))) // eslint-disable-line n/no-deprecated-api
+      return this.factory.namedNode(this.applyBaseIRI(aboutUrlTemplate.fill(row)))
     }
   }
 
@@ -182,7 +187,7 @@ export default class TableSchema {
     }
   }
 
-  columns({ contentLine, row }: { contentLine: number; row: Row }): Column[] {
+  columns({ contentLine, row }: { contentLine: number, row: Row }): Column[] {
     try {
       if (!this.allColumns) {
         this.createAllColumns(row)
@@ -199,8 +204,9 @@ export default class TableSchema {
       }).filter((column: Column) => {
         return column.value !== undefined
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (cause: any) {
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (cause: any) {
       const err = new Error(`could not parse content line ${contentLine}`)
 
       err.stack += `\nCaused by: ${cause.stack}`
@@ -214,7 +220,7 @@ export default class TableSchema {
       return null
     }
 
-    return this.factory.namedNode(URL.resolve(this.baseIRI, column.aboutUrl.fill(row))) // eslint-disable-line n/no-deprecated-api
+    return this.factory.namedNode(this.applyBaseIRI(column.aboutUrl.fill(row)))
   }
 
   value(column: ParsedColumn, row: Row) {
@@ -239,7 +245,7 @@ export default class TableSchema {
     }
 
     if (column.datatype.format) {
-      let literal:string | undefined
+      let literal: string | undefined
 
       const date = parseDateTime(value, column.datatype.format, this.timezone)
       switch (column.datatype.base.value) {

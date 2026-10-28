@@ -1,10 +1,12 @@
-import { Transform } from 'readable-stream'
+import { Transform } from 'node:stream'
 import type { BlankNode, DatasetCore, NamedNode, Quad } from '@rdfjs/types'
 import parseMetadata from './metadata/index.js'
-import namespace, { NS } from './namespace.js'
-import TableSchema from './metadata/TableSchema.js'
-import Metadata from './metadata/Metadata.js'
-import rdf, { Factory } from './Factory.js'
+import type { NS } from './namespace.js'
+import namespace from './namespace.js'
+import type TableSchema from './metadata/TableSchema.js'
+import type Metadata from './metadata/Metadata.js'
+import type { Factory } from './Factory.js'
+import rdf from './Factory.js'
 
 interface Options {
   baseIRI?: string
@@ -49,7 +51,7 @@ export default class ObjectParserTransform extends Transform {
     this.processTable()
   }
 
-  _transform(obj: { line: number; row: Record<string, string> }, encoding: string, done: () => void) {
+  _transform(obj: { line: number, row: Record<string, string> }, encoding: string, done: () => void) {
     this.processRow(obj.line, obj.row).then(done).catch(done)
   }
 
