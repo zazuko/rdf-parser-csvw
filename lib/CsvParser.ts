@@ -51,7 +51,7 @@ export default class CsvParser extends Transform {
     }
   }
 
-  _transform(chunk: Record<string, string>, encoding: string, callback: () => void) {
+  _transform(chunk: Record<string, string>, encoding: BufferEncoding, callback: () => void) {
     this.parser.write(chunk, encoding, callback)
   }
 

@@ -15,7 +15,8 @@ export default class MetadataBuilder {
         const chunk = stream.read()
 
         if (chunk === null) {
-          return setTimeout(next, 10)
+          setTimeout(next, 10)
+          return
         }
 
         chunks.push(chunk)
